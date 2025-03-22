@@ -18,26 +18,22 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # Note: This workflow uses the latest stable version of the Dart SDK.
-      # You can specify other versions if desired, see documentation here:
-      # https://github.com/dart-lang/setup-dart/blob/main/README.md
-      # - uses: dart-lang/setup-dart@v1
-      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
-
+      # Set up Flutter instead of Dart
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+      
       - name: Install dependencies
-        run: dart pub get
+        run: flutter pub get
 
-      # Verify the use of 'dart format' on each commit.
+      # Verify the use of 'flutter format' on each commit.
       - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed .
+        run: flutter format --output=none --set-exit-if-changed .
 
       # Consider passing '--fatal-infos' for slightly stricter analysis.
       - name: Analyze project source
-        run: dart analyze
+        run: flutter analyze
 
-      # Ensure we didn't accidentally leak API key, and then run tests using Repository's Secret Environment API key.
+      # Run tests without exposing sensitive information.
       - name: Run tests
-        run: dart test
-        env:
-          EXEC_ENV: 'github_actions'
-          ORS_API_KEY: ${{ secrets.ORS_API_KEY }}
+        run: flutter test --coverage
