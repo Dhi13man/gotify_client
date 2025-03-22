@@ -16,22 +16,22 @@ class AuthService {
       final prefs = await SharedPreferences.getInstance();
       final authData = prefs.getString(_authKey);
 
-      if (authData != null) {
-        final authMap = jsonDecode(authData);
-        final token = await _secureStorage.read(key: _tokenKey);
-
-        return AuthState(
-          isAuthenticated: authMap['isAuthenticated'] && token != null,
-          serverUrl: authMap['serverUrl'] ?? '',
-          clientToken: token,
-          error: null,
-        );
+      if (authData == null) {
+        return AuthState.initial();
       }
+
+      final authMap = jsonDecode(authData);
+      final token = await _secureStorage.read(key: _tokenKey);
+      return AuthState(
+        isAuthenticated: authMap['isAuthenticated'] && token != null,
+        serverUrl: authMap['serverUrl'] ?? '',
+        clientToken: token,
+        error: null,
+      );
     } catch (e) {
       _logger.severe('Error loading auth data', e);
+      return AuthState.initial();
     }
-
-    return AuthState.initial();
   }
 
   Future<AuthState> login(AuthConfig config) async {
@@ -93,7 +93,6 @@ class AuthService {
         clientToken: token,
         error: null,
       );
-
       await _saveAuth(authState);
       return authState;
     } catch (e) {
@@ -123,19 +122,23 @@ class AuthService {
 
       // Store non-sensitive data in SharedPreferences
       await prefs.setString(
-          _authKey,
-          jsonEncode({
+        _authKey,
+        jsonEncode(
+          {
             'isAuthenticated': authState.isAuthenticated,
             'serverUrl': authState.serverUrl,
-          }));
+          },
+        ),
+      );
 
       // Store token securely
-      if (authState.clientToken != null) {
-        await _secureStorage.write(
-          key: _tokenKey,
-          value: authState.clientToken!,
-        );
+      if (authState.clientToken == null) {
+        return;
       }
+      await _secureStorage.write(
+        key: _tokenKey,
+        value: authState.clientToken!,
+      );
     } catch (e) {
       _logger.severe('Error saving auth data', e);
     }

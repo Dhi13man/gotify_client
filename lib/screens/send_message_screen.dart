@@ -51,8 +51,9 @@ class SendMessageScreenState extends State<SendMessageScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                Provider.of<MessageProvider>(context, listen: false).error ??
-                    'Failed to send message'),
+              Provider.of<MessageProvider>(context, listen: false).error ??
+                  'Failed to send message',
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -63,9 +64,7 @@ class SendMessageScreenState extends State<SendMessageScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Send Message'),
-      ),
+      appBar: AppBar(title: const Text('Send Message')),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),

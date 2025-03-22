@@ -10,15 +10,19 @@ class MessageProvider extends ChangeNotifier {
   String? _error;
 
   List<Message> get messages => _messages;
+
   bool get isLoading => _loading;
+
   String? get error => _error;
 
   void initialize(AuthState authState) {
-    if (authState.isAuthenticated) {
-      _messageService = MessageService(authState);
-      _messageService!.connect(onMessage: _handleNewMessage);
-      loadMessages();
+    if (!authState.isAuthenticated) {
+      return;
     }
+
+    _messageService = MessageService(authState);
+    _messageService!.connect(onMessage: _handleNewMessage);
+    loadMessages();
   }
 
   @override

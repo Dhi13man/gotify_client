@@ -4,7 +4,7 @@ class AuthConfig {
   final String? password;
   final String? clientToken;
 
-  AuthConfig({
+  const AuthConfig({
     required this.serverUrl,
     this.username,
     this.password,
@@ -18,7 +18,7 @@ class AuthState {
   final String? clientToken;
   final String? error;
 
-  AuthState({
+  const AuthState({
     required this.isAuthenticated,
     required this.serverUrl,
     this.clientToken,
@@ -26,7 +26,7 @@ class AuthState {
   });
 
   factory AuthState.initial() {
-    return AuthState(
+    return const AuthState(
       isAuthenticated: false,
       serverUrl: '',
       clientToken: null,

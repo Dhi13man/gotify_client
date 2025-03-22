@@ -4,12 +4,17 @@ import 'package:gotify_client/services/auth_service.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
+
   AuthState _authState = AuthState.initial();
+
   bool _loading = false;
 
   AuthState get authState => _authState;
+
   bool get isAuthenticated => _authState.isAuthenticated;
+
   bool get isLoading => _loading;
+
   String? get error => _authState.error;
 
   AuthProvider() {

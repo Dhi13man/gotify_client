@@ -7,7 +7,7 @@ class Message {
   final int appid;
   final Map<String, dynamic>? extras;
 
-  Message({
+  const Message({
     required this.id,
     required this.title,
     required this.message,

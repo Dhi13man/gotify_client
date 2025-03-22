@@ -28,30 +28,33 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   void _login() async {
-    if (_formKey.currentState!.validate()) {
-      final config = AuthConfig(
-        serverUrl: _serverUrlController.text.trim(),
-        username: _useToken ? null : _usernameController.text,
-        password: _useToken ? null : _passwordController.text,
-        clientToken: _useToken ? _tokenController.text : null,
-      );
-
-      final success =
-          await Provider.of<AuthProvider>(context, listen: false).login(config);
-
-      if (!success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              Provider.of<AuthProvider>(context, listen: false).error ??
-                  'Login failed',
-            ),
-            backgroundColor: Colors.red,
-            duration: const Duration(seconds: 5),
-          ),
-        );
-      }
+    if (!_formKey.currentState!.validate()) {
+      return;
     }
+
+    final config = AuthConfig(
+      serverUrl: _serverUrlController.text.trim(),
+      username: _useToken ? null : _usernameController.text,
+      password: _useToken ? null : _passwordController.text,
+      clientToken: _useToken ? _tokenController.text : null,
+    );
+
+    final success =
+        await Provider.of<AuthProvider>(context, listen: false).login(config);
+    if (success || !mounted) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          Provider.of<AuthProvider>(context, listen: false).error ??
+              'Login failed',
+        ),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 5),
+      ),
+    );
   }
 
   @override
