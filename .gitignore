@@ -1,0 +1,107 @@
+# General
+*.lock
+*.log
+*.pyc
+*.swp
+*.swo
+*.DS_Store
+.DS_Store
+Thumbs.db
+.env
+.env.local
+.env.*.local
+
+# Flutter/Dart/Pub
+**/doc/api/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+.pubignore
+build/
+flutter_*.png
+*.dart.js
+*.js
+*.js.map
+*.mjs
+*.css
+*.css.map
+
+# Android
+android/**/gradle-wrapper.jar
+android/.gradle/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+android/**/GeneratedPluginRegistrant.java
+android/app/build/
+android/**/build/
+
+# iOS
+ios/**/.symlinks/
+ios/**/profile
+ios/**/xcuserdata/
+ios/.generated/
+ios/Flutter/App.framework/
+ios/Flutter/Flutter.framework/
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/app.flx
+ios/Flutter/app.zip
+ios/Flutter/flutter_assets/
+ios/ServiceDefinitions.json
+ios/Pods/
+ios/Runner/GeneratedPluginRegistrant.h
+ios/Runner/GeneratedPluginRegistrant.m
+ios/Runner/AppIcon.appiconset/
+ios/Runner/Assets.car
+ios/Runner/Info.plist
+ios/Runner/main.m
+ios/**/Podfile.lock
+ios/**/.symlinks/
+ios/**/DerivedData/
+ios/**/build/
+
+# macOS
+macos/.swiftpm/
+macos/Flutter/GeneratedPluginRegistrant.swift
+macos/Flutter/Flutter-Debug.xcconfig
+macos/Flutter/Flutter-Release.xcconfig
+macos/Flutter/Flutter-Profile.xcconfig
+macos/Flutter/Ephemeral/
+macos/Runner/Assets.xcassets/
+macos/Runner/DerivedData/
+macos/Runner/Preview Content/
+macos/Runner/build/
+macos/Runner/*.xcodeproj/xcuserdata/
+macos/Runner/*.xcworkspace/xcuserdata/
+
+# Web
+web/coverage/
+.webpack/
+
+# IDEs
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Coverage
+coverage/
+lcov.info
+
+# Dependency directories
+packages/
+pubspec_overrides.yaml
+
+# Local configuration
+local.properties
+flutter_*/**/google-services.json
+flutter_*/**/GoogleService-Info.plist
