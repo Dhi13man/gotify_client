@@ -52,7 +52,7 @@ Make sure you familiarize yourself with [Gotify](https://gotify.net/) and its AP
     git push origin <new-branch-name>
     ```
 
-11. Create a pull request on the original repository from your fork and wait for review.
+12. Create a pull request on the original repository from your fork and wait for review.
 
 ### Recommended Development Workflow
 
