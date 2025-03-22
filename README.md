@@ -1,5 +1,16 @@
 # Gotify Client
 
+[![License](https://img.shields.io/github/license/dhi13man/gotify_client)](https://github.com/Dhi13man/gotify_client/blob/main/LICENSE)
+[![Language](https://img.shields.io/badge/language-Dart-blue.svg)](https://dart.dev)
+[![Language](https://img.shields.io/badge/language-Flutter-blue.svg)](https://flutter.dev)
+[![Contributors](https://img.shields.io/github/contributors-anon/dhi13man/gotify_client?style=flat)](https://github.com/Dhi13man/gotify_client/graphs/contributors)
+[![GitHub forks](https://img.shields.io/github/forks/dhi13man/gotify_client?style=social)](https://github.com/Dhi13man/gotify_client/network/members)
+[![GitHub Repo stars](https://img.shields.io/github/stars/dhi13man/gotify_client?style=social)](https://github.com/Dhi13man/gotify_client/stargazers)
+[![Last Commit](https://img.shields.io/github/last-commit/dhi13man/gotify_client)](https://github.com/Dhi13man/gotify_client/commits/main)
+[![Build, Format, Test](https://github.com/Dhi13man/gotify_client/workflows/Build,%20Format,%20Test/badge.svg)](https://github.com/Dhi13man/gotify_client/actions)
+
+[!["Buy Me A Coffee"](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20an%20Ego%20boost&emoji=%F0%9F%98%B3&slug=dhi13man&button_colour=FF5F5F&font_colour=ffffff&font_family=Lato&outline_colour=000000&coffee_colour=FFDD00****)](https://www.buymeacoffee.com/dhi13man)
+
 A minimal, cross-platform Gotify client UI built with Flutter.
 
 ## About
@@ -26,18 +37,21 @@ This app provides a clean and intuitive mobile interface for [Gotify](https://go
 ### Building from source
 
 1. Clone the repository:
-   ```
+
+   ```sh
    git clone https://github.com/yourusername/gotify_client.git
    cd gotify_client
    ```
 
 2. Install dependencies:
-   ```
+
+   ```sh
    flutter pub get
    ```
 
 3. Run the app:
-   ```
+
+   ```sh
    flutter run
    ```
 
@@ -61,7 +75,7 @@ This app provides a clean and intuitive mobile interface for [Gotify](https://go
 
 ## Screenshots
 
-*Coming soon*
+- *Coming soon*
 
 ## Contributing
 
