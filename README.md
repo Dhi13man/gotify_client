@@ -15,7 +15,7 @@ A minimal, cross-platform Gotify client UI built with Flutter.
 
 ## About
 
-This app provides a clean and intuitive mobile interface for [Gotify](https://gotify.net/) - a simple server for sending and receiving push notifications. It allows you to receive and manage notifications from your self-hosted Gotify server on both Android and iOS devices.
+This app provides a clean and intuitive cross-platform interface for [Gotify](https://gotify.net/) - a simple server for sending and receiving push notifications. It allows you to send, receive and manage notifications from your self-hosted Gotify server on Desktop, Android and iOS devices.
 
 ## Features
 
