@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:gotify_client/providers/message_provider.dart';
 import 'package:gotify_client/models/message_model.dart';
-import 'package:gotify_client/components/priority_indicator.dart';
+import 'package:gotify_client/components/message_list_screen/priority_indicator.dart';
 import 'package:intl/intl.dart';
 
 class MessageListScreen extends StatefulWidget {
