@@ -13,17 +13,19 @@ class LoginScreen extends StatefulWidget {
 class LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _serverUrlController = TextEditingController();
+  final _tokenController = TextEditingController();
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _tokenController = TextEditingController();
-  bool _useToken = false;
+  bool _showAdvancedLogin = false;
+  bool _obscureToken = true;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
     _serverUrlController.dispose();
+    _tokenController.dispose();
     _usernameController.dispose();
     _passwordController.dispose();
-    _tokenController.dispose();
     super.dispose();
   }
 
@@ -33,32 +35,33 @@ class LoginScreenState extends State<LoginScreen> {
     }
 
     final config = _createAuthConfig();
-    final success =
-        await Provider.of<AuthProvider>(context, listen: false).login(config);
-    if (!success && mounted) {
-      _showLoginError();
+
+    // Store ScaffoldMessenger before the async gap
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    final success = await authProvider.login(config);
+
+    if (!mounted) return;
+
+    if (!success) {
+      final errorMessage = authProvider.error ?? 'Login failed';
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: Text(errorMessage),
+          backgroundColor: Theme.of(context).colorScheme.error,
+          duration: const Duration(seconds: 5),
+        ),
+      );
     }
   }
 
   AuthConfig _createAuthConfig() {
     return AuthConfig(
       serverUrl: _serverUrlController.text.trim(),
-      username: _useToken ? null : _usernameController.text,
-      password: _useToken ? null : _passwordController.text,
-      clientToken: _useToken ? _tokenController.text : null,
-    );
-  }
-
-  void _showLoginError() {
-    final errorMessage =
-        Provider.of<AuthProvider>(context, listen: false).error ??
-            'Login failed';
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(errorMessage),
-        backgroundColor: Theme.of(context).colorScheme.error,
-        duration: const Duration(seconds: 5),
-      ),
+      username: _showAdvancedLogin ? _usernameController.text : null,
+      password: _showAdvancedLogin ? _passwordController.text : null,
+      clientToken: _showAdvancedLogin ? null : _tokenController.text,
     );
   }
 
@@ -69,11 +72,22 @@ class LoginScreenState extends State<LoginScreen> {
     return Scaffold(
       backgroundColor: colorScheme.surface,
       body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: _buildLoginCard(),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  _buildLogoHeader(),
+                  const SizedBox(height: 32),
+                  _buildLoginForm(),
+                  const SizedBox(height: 16),
+                  _buildHelperLinks(),
+                  const SizedBox(height: 24),
+                  _buildVersionInfo(),
+                ],
+              ),
             ),
           ),
         ),
@@ -81,204 +95,334 @@ class LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Widget _buildLoginCard() {
+  Widget _buildLogoHeader() {
     final colorScheme = Theme.of(context).colorScheme;
-    colorScheme;
+
+    return Column(
+      children: [
+        Container(
+          width: 80,
+          height: 80,
+          decoration: BoxDecoration(
+            color: colorScheme.primaryContainer,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            Icons.notifications_active,
+            size: 40,
+            color: colorScheme.primary,
+          ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'Welcome to Gotify',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.w600,
+            color: colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          _showAdvancedLogin
+              ? 'Login with your credentials'
+              : 'Enter your client token to continue',
+          style: TextStyle(
+            fontSize: 14,
+            color: colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLoginForm() {
+    final colorScheme = Theme.of(context).colorScheme;
+    final authProvider = Provider.of<AuthProvider>(context);
 
     return Card(
-      elevation: 3,
-      surfaceTintColor: Colors.white,
-      color: Theme.of(context).cardTheme.color,
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.2)),
       ),
+      color: colorScheme.surface,
       child: Padding(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.notifications_active,
-                    size: 28,
-                    color: colorScheme.primary,
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Server URL field is common for both login methods
+            _buildServerUrlField(),
+            const SizedBox(height: 20),
+
+            // Show either token field or username/password fields
+            if (!_showAdvancedLogin)
+              _buildTokenField()
+            else
+              _buildCredentialFields(),
+
+            const SizedBox(height: 24),
+
+            // Login button
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: authProvider.isLoading ? null : _login,
+                style: ElevatedButton.styleFrom(
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  const SizedBox(width: 12),
-                  Text(
-                    'Gotify Client',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                ],
+                ),
+                child: authProvider.isLoading
+                    ? SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: colorScheme.onPrimary,
+                        ),
+                      )
+                    : Text(
+                        'Login',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
               ),
-              const SizedBox(height: 32),
-              _buildServerUrlField(),
-              const SizedBox(height: 24),
-              _buildAuthMethodSelector(),
-              const SizedBox(height: 24),
-              _useToken ? _buildTokenField() : _buildCredentialFields(),
-              const SizedBox(height: 32),
-              _buildLoginButton(),
-              _buildErrorMessage(),
-            ],
-          ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Toggle between login methods
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    _showAdvancedLogin = !_showAdvancedLogin;
+                  });
+                },
+                child: Text(
+                  _showAdvancedLogin
+                      ? 'Use token authentication instead'
+                      : 'Use username & password instead',
+                  style: TextStyle(
+                    color: colorScheme.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildServerUrlField() {
-    return TextFormField(
-      controller: _serverUrlController,
-      decoration: InputDecoration(
-        labelText: 'Server URL',
-        hintText: 'https://gotify.example.com',
-        prefixIcon:
-            Icon(Icons.link, color: Theme.of(context).colorScheme.primary),
-      ),
-      validator: AuthFormValidator.validateServerUrl,
-      keyboardType: TextInputType.url,
-    );
-  }
-
-  Widget _buildAuthMethodSelector() {
     final colorScheme = Theme.of(context).colorScheme;
-    colorScheme;
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Expanded(
-              child: Divider(color: colorScheme.outline.withValues(alpha: 0.5)),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Text(
-                'Authentication Method',
-                style: TextStyle(
-                  color: colorScheme.secondary,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            Expanded(
-              child: Divider(color: colorScheme.outline.withValues(alpha: 0.5)),
-            ),
-          ],
+        Text(
+          'Server URL',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: colorScheme.onSurface,
+          ),
         ),
-        const SizedBox(height: 16),
-        Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: colorScheme.outline.withValues(alpha: 0.3),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _serverUrlController,
+          decoration: InputDecoration(
+            hintText: 'https://gotify.example.com',
+            prefixIcon: Icon(Icons.link, color: colorScheme.primary),
+            suffixIcon: Icon(
+              Icons.check_circle,
+              color: colorScheme.primary.withValues(alpha: 0.5),
+              size: 20,
             ),
-            color: colorScheme.surface,
           ),
-          child: SwitchListTile(
-            title: Text(
-              _useToken ? 'Using Client Token' : 'Using Username & Password',
-              style: TextStyle(
-                fontWeight: FontWeight.w500,
-                color: colorScheme.onSurface,
-              ),
-            ),
-            activeColor: colorScheme.primary,
-            value: _useToken,
-            onChanged: (useToken) => setState(() => _useToken = useToken),
-          ),
+          validator: AuthFormValidator.validateServerUrl,
+          keyboardType: TextInputType.url,
+          textInputAction: TextInputAction.next,
         ),
       ],
     );
   }
 
   Widget _buildTokenField() {
-    return TextFormField(
-      controller: _tokenController,
-      decoration: InputDecoration(
-        labelText: 'Client Token',
-        prefixIcon:
-            Icon(Icons.vpn_key, color: Theme.of(context).colorScheme.primary),
-      ),
-      validator: AuthFormValidator.validateToken,
-      obscureText: true,
-    );
-  }
+    final colorScheme = Theme.of(context).colorScheme;
 
-  Widget _buildCredentialFields() {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        TextFormField(
-          controller: _usernameController,
-          decoration: InputDecoration(
-            labelText: 'Username',
-            prefixIcon: Icon(Icons.person,
-                color: Theme.of(context).colorScheme.primary),
+        Text(
+          'Client Token',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: colorScheme.onSurface,
           ),
-          validator: AuthFormValidator.validateUsername,
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 8),
         TextFormField(
-          controller: _passwordController,
+          controller: _tokenController,
           decoration: InputDecoration(
-            labelText: 'Password',
-            prefixIcon:
-                Icon(Icons.lock, color: Theme.of(context).colorScheme.primary),
+            hintText: 'Enter your client token',
+            prefixIcon: Icon(Icons.vpn_key, color: colorScheme.primary),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscureToken ? Icons.visibility : Icons.visibility_off,
+                color: colorScheme.onSurface.withValues(alpha: 0.5),
+                size: 20,
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscureToken = !_obscureToken;
+                });
+              },
+            ),
           ),
-          validator: AuthFormValidator.validatePassword,
-          obscureText: true,
+          validator: AuthFormValidator.validateToken,
+          obscureText: _obscureToken,
+          textInputAction: TextInputAction.done,
+          onEditingComplete: _login,
         ),
       ],
     );
   }
 
-  Widget _buildLoginButton() {
-    final authProvider = Provider.of<AuthProvider>(context);
+  Widget _buildCredentialFields() {
+    final colorScheme = Theme.of(context).colorScheme;
 
-    return SizedBox(
-      width: double.infinity,
-      height: 50,
-      child: ElevatedButton(
-        onPressed: authProvider.isLoading ? null : _login,
-        child: authProvider.isLoading
-            ? SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
-              )
-            : const Text(
-                'Login',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Username',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _usernameController,
+          decoration: InputDecoration(
+            hintText: 'Enter your username',
+            prefixIcon: Icon(Icons.person, color: colorScheme.primary),
+          ),
+          validator: AuthFormValidator.validateUsername,
+          textInputAction: TextInputAction.next,
+        ),
+        const SizedBox(height: 20),
+        Text(
+          'Password',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            color: colorScheme.onSurface,
+          ),
+        ),
+        const SizedBox(height: 8),
+        TextFormField(
+          controller: _passwordController,
+          decoration: InputDecoration(
+            hintText: 'Enter your password',
+            prefixIcon: Icon(Icons.lock, color: colorScheme.primary),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                color: colorScheme.onSurface.withValues(alpha: 0.5),
+                size: 20,
               ),
+              onPressed: () {
+                setState(() {
+                  _obscurePassword = !_obscurePassword;
+                });
+              },
+            ),
+          ),
+          validator: AuthFormValidator.validatePassword,
+          obscureText: _obscurePassword,
+          textInputAction: TextInputAction.done,
+          onEditingComplete: _login,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHelperLinks() {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return TextButton.icon(
+      onPressed: () {
+        _showHelpDialog();
+      },
+      icon: Icon(
+        Icons.help_outline,
+        size: 18,
+        color: colorScheme.primary,
+      ),
+      label: Text(
+        'How to get a client token?',
+        style: TextStyle(
+          color: colorScheme.primary,
+          fontSize: 14,
+        ),
       ),
     );
   }
 
-  Widget _buildErrorMessage() {
-    final error = Provider.of<AuthProvider>(context).error;
-    if (error == null) {
-      return const SizedBox.shrink();
-    }
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 16),
-      child: Text(
-        error,
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.error,
-          fontWeight: FontWeight.w500,
+  void _showHelpDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Getting a Client Token'),
+        content: const SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'To get a client token:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 8),
+              Text('1. Log in to your Gotify server web interface'),
+              Text('2. Go to "CLIENTS" section'),
+              Text('3. Create a new client or select an existing one'),
+              Text('4. Copy the generated token'),
+              SizedBox(height: 16),
+              Text(
+                'Note: Client tokens are used for logging into this app. '
+                'They are different from application tokens, which are used for sending messages.',
+              ),
+            ],
+          ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVersionInfo() {
+    return Text(
+      'Gotify Client v1.0.0',
+      style: TextStyle(
+        fontSize: 12,
+        color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5),
       ),
     );
   }
