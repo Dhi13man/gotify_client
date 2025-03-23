@@ -28,23 +28,17 @@ class PriorityIndicator extends StatelessWidget {
         if (showLabel) ...[
           const SizedBox(width: 8),
           Text(
-            _getPriorityLabel(),
+            priority.toString(),
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
               color: Theme.of(context).brightness == Brightness.light
-                  ? const Color(0xFF6B7280) // Gray-500
-                  : const Color(0xFFD1D5DB), // Gray-300
+                  ? const Color(0xFF6B7280)
+                  : const Color(0xFFD1D5DB),
             ),
           ),
         ],
       ],
     );
-  }
-
-  String _getPriorityLabel() {
-    if (priority >= 8) return 'High Priority';
-    if (priority >= 4) return 'Medium Priority';
-    return 'Low Priority';
   }
 }

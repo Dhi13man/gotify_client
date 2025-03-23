@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:gotify_client/models/enums.dart';
 
 /// Centralizes all theme-related configurations for the application
 class AppTheme {
@@ -143,10 +144,21 @@ class AppTheme {
 
   // Helper method for priority colors
   static Color getPriorityColor(BuildContext context, int priority) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    if (priority >= 8) return colorScheme.error; // High priority
-    if (priority >= 4) return getWarningColor(context); // Medium priority
-    return colorScheme.primary; // Low priority
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final PriorityType priorityType = PriorityType.fromNumeric(priority);
+    switch (priorityType) {
+      case PriorityType.max:
+        return Color(0xFFB91C1C);
+      case PriorityType.high:
+        return Color.fromARGB(255, 238, 139, 85);
+      case PriorityType.medium:
+        return Color.fromARGB(255, 255, 190, 48);
+      case PriorityType.low:
+        return Color.fromARGB(255, 51, 152, 88);
+      case PriorityType.min:
+        return Color(0xFFD1D5DB);
+      default:
+        return colorScheme.primary; // Default to primary color
+    }
   }
 }

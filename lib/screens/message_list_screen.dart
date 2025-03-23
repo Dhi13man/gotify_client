@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:gotify_client/providers/message_provider.dart';
-import 'package:gotify_client/models/message_model.dart';
 import 'package:gotify_client/components/message_list_screen/priority_indicator.dart';
+import 'package:gotify_client/components/message_list_screen/filter_bar.dart';
+import 'package:gotify_client/models/enums.dart';
+import 'package:gotify_client/models/message_model.dart';
+import 'package:gotify_client/providers/message_provider.dart';
 import 'package:intl/intl.dart';
 
 class MessageListScreen extends StatefulWidget {
@@ -13,7 +15,7 @@ class MessageListScreen extends StatefulWidget {
 }
 
 class MessageListScreenState extends State<MessageListScreen> {
-  String _selectedFilter = 'All';
+  PriorityType _selectedFilter = PriorityType.min;
 
   @override
   void initState() {
@@ -61,7 +63,11 @@ class MessageListScreenState extends State<MessageListScreen> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _buildFilterBar(),
+        FilterBar(
+          selectedFilter: _selectedFilter,
+          onFilterChanged: (PriorityType filter) =>
+              setState(() => _selectedFilter = filter),
+        ),
         Expanded(
           child: Consumer<MessageProvider>(
             builder: (context, messageProvider, _) {
@@ -80,79 +86,14 @@ class MessageListScreenState extends State<MessageListScreen> {
               }
 
               final filteredMessages =
-                  _filterMessages(messageProvider.messages);
+                  filterMessages(messageProvider.messages, _selectedFilter);
               final groupedMessages = _groupMessagesByDate(filteredMessages);
-
               return _buildMessageList(groupedMessages);
             },
           ),
         ),
       ],
     );
-  }
-
-  Widget _buildFilterBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            _buildFilterChip('All'),
-            const SizedBox(width: 8),
-            _buildFilterChip('High Priority'),
-            const SizedBox(width: 8),
-            _buildFilterChip('Medium Priority'),
-            const SizedBox(width: 8),
-            _buildFilterChip('Low Priority'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(String label) {
-    final isSelected = _selectedFilter == label;
-    final primaryColor = Theme.of(context).colorScheme.primary;
-
-    return GestureDetector(
-      onTap: () {
-        setState(() => _selectedFilter = label);
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? primaryColor : Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isSelected ? primaryColor : const Color(0xFFD1D5DB),
-          ),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : const Color(0xFF6B7280),
-            fontSize: 14,
-            fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
-          ),
-        ),
-      ),
-    );
-  }
-
-  List<Message> _filterMessages(List<Message> messages) {
-    switch (_selectedFilter) {
-      case 'High Priority':
-        return messages.where((message) => message.priority >= 8).toList();
-      case 'Medium Priority':
-        return messages
-            .where((message) => message.priority >= 4 && message.priority < 8)
-            .toList();
-      case 'Low Priority':
-        return messages.where((message) => message.priority < 4).toList();
-      default:
-        return messages;
-    }
   }
 
   Map<String, List<Message>> _groupMessagesByDate(List<Message> messages) {
@@ -302,99 +243,101 @@ class MessageListScreenState extends State<MessageListScreen> {
   }
 
   Widget _buildMessageCard(Message message) {
-    return Dismissible(
-      key: Key('message-${message.id}'),
-      direction: DismissDirection.endToStart,
-      onDismissed: (_) => _deleteMessage(message),
-      background: Container(
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.error,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: const Icon(Icons.delete, color: Colors.white),
-      ),
-      confirmDismiss: (_) => _confirmDismiss(message),
-      child: Card(
-        margin: const EdgeInsets.only(bottom: 12),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  PriorityIndicator(priority: message.priority),
-                  Text(
-                    _formatTimeAgo(message.date),
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 12),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 12,
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .primary
+                      .withValues(alpha: 0.1),
+                  child: Text(
+                    message.appid.toString(),
                     style: TextStyle(
                       fontSize: 12,
-                      color: Theme.of(context).brightness == Brightness.light
-                          ? const Color(0xFF6B7280) // Gray-500
-                          : const Color(0xFF9CA3AF), // Gray-400
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
-                ],
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  'App ID: ${message.appid}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              message.title.isNotEmpty ? message.title : 'Notification',
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
               ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  CircleAvatar(
-                    radius: 12,
-                    backgroundColor: Theme.of(context)
-                        .colorScheme
-                        .primary
-                        .withValues(alpha: 0.1),
-                    child: Text(
-                      message.appid.toString(),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              message.message,
+              style: TextStyle(
+                fontSize: 14,
+                color: Theme.of(context).brightness == Brightness.light
+                    ? const Color(0xFF4B5563) // Gray-600
+                    : const Color(0xFFD1D5DB), // Gray-300
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                PriorityIndicator(priority: message.priority),
+                Row(
+                  children: [
+                    Text(
+                      _formatTimeAgo(message.date),
                       style: TextStyle(
                         fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
+                        color: Theme.of(context).brightness == Brightness.light
+                            ? const Color(0xFF6B7280) // Gray-500
+                            : const Color(0xFF9CA3AF), // Gray-400
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'App ID: ${message.appid}',
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                    const SizedBox(width: 8),
+                    // Add delete button
+                    IconButton(
+                      icon: const Icon(Icons.delete_outline),
+                      color: colorScheme.error,
+                      iconSize: 20,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                      onPressed: () => _showDeleteConfirmation(message),
+                      tooltip: 'Delete message',
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Text(
-                message.title.isNotEmpty ? message.title : 'Notification',
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
+                  ],
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                message.message,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Theme.of(context).brightness == Brightness.light
-                      ? const Color(0xFF4B5563) // Gray-600
-                      : const Color(0xFFD1D5DB), // Gray-300
-                ),
-              ),
-            ],
-          ),
+              ],
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Future<bool> _confirmDismiss(Message message) async {
+  Future<void> _showDeleteConfirmation(Message message) async {
     final colorScheme = Theme.of(context).colorScheme;
 
-    return await showDialog<bool>(
+    final bool confirmed = await showDialog<bool>(
           context: context,
           builder: (dialogContext) => AlertDialog(
             title: const Text('Delete Message'),
@@ -413,7 +356,10 @@ class MessageListScreenState extends State<MessageListScreen> {
             ],
           ),
         ) ??
-        false; // Default to false if dialog returns null
+        false;
+    if (confirmed && mounted) {
+      await _deleteMessage(message);
+    }
   }
 
   String _formatDateTime(String dateString) {

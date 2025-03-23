@@ -1,18 +1,10 @@
 // ignore_for_file: curly_braces_in_flow_control_structures
 
 import 'package:flutter/material.dart';
+import 'package:gotify_client/models/enums.dart';
+import 'package:gotify_client/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 import 'package:gotify_client/providers/message_provider.dart';
-
-/// Constants for priority levels
-class PriorityLevels {
-  static const int low = 1;
-  static const int normal = 3;
-  static const int high = 7;
-  static const int urgent = 10;
-  static const int min = 0;
-  static const int max = 10;
-}
 
 class SendMessageScreen extends StatefulWidget {
   const SendMessageScreen({super.key});
@@ -22,7 +14,7 @@ class SendMessageScreen extends StatefulWidget {
 }
 
 class SendMessageScreenState extends State<SendMessageScreen> {
-  static const int defaultPriority = PriorityLevels.normal;
+  static const int defaultPriority = PriorityType.mediumValue;
   static const String defaultApplicationToken = '';
 
   final _formKey = GlobalKey<FormState>();
@@ -179,8 +171,8 @@ class SendMessageScreenState extends State<SendMessageScreen> {
   }
 
   Widget _buildPrioritySection() {
-    final colorScheme = Theme.of(context).colorScheme;
-
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Color priorityColor = AppTheme.getPriorityColor(context, _priority);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -211,15 +203,15 @@ class SendMessageScreenState extends State<SendMessageScreen> {
                     padding:
                         const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: _getPriorityColor().withValues(alpha: 0.15),
+                      color: priorityColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
-                      _getPriorityLabel(),
+                      PriorityType.fromNumeric(_priority).toString(),
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: _getPriorityColor(),
+                        color: priorityColor,
                       ),
                     ),
                   ),
@@ -228,19 +220,19 @@ class SendMessageScreenState extends State<SendMessageScreen> {
               const SizedBox(height: 16),
               SliderTheme(
                 data: SliderTheme.of(context).copyWith(
-                  activeTrackColor: _getPriorityColor(),
-                  inactiveTrackColor:
-                      _getPriorityColor().withValues(alpha: 0.2),
-                  thumbColor: _getPriorityColor(),
+                  activeTrackColor: priorityColor,
+                  inactiveTrackColor: priorityColor.withValues(alpha: 0.2),
+                  thumbColor: priorityColor,
                   trackHeight: 6,
                   thumbShape:
                       const RoundSliderThumbShape(enabledThumbRadius: 8),
                 ),
                 child: Slider(
                   value: _priority.toDouble(),
-                  min: PriorityLevels.min.toDouble(),
-                  max: PriorityLevels.max.toDouble(),
-                  divisions: PriorityLevels.max - PriorityLevels.min,
+                  min: PriorityType.min.numericValue.toDouble(),
+                  max: PriorityType.max.numericValue.toDouble(),
+                  divisions: PriorityType.max.numericValue -
+                      PriorityType.min.numericValue,
                   label: _priority.toString(),
                   onChanged: (double value) =>
                       _updatePriorityValue(value.toInt()),
@@ -250,10 +242,9 @@ class SendMessageScreenState extends State<SendMessageScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _priorityChip('Low', PriorityLevels.low),
-                  _priorityChip('Normal', PriorityLevels.normal),
-                  _priorityChip('High', PriorityLevels.high),
-                  _priorityChip('Urgent', PriorityLevels.urgent),
+                  _priorityChip(PriorityType.low),
+                  _priorityChip(PriorityType.medium),
+                  _priorityChip(PriorityType.high),
                 ],
               ),
             ],
@@ -261,21 +252,6 @@ class SendMessageScreenState extends State<SendMessageScreen> {
         )
       ],
     );
-  }
-
-  Color _getPriorityColor() {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    if (_priority >= 8) return colorScheme.error;
-    if (_priority >= 4) return const Color(0xFFF59E0B); // Warning color
-    return colorScheme.primary;
-  }
-
-  String _getPriorityLabel() {
-    if (_priority >= 8) return 'Urgent';
-    if (_priority >= 4) return 'High';
-    if (_priority >= 2) return 'Normal';
-    return 'Low';
   }
 
   Widget _buildApplicationTokenField() {
@@ -330,40 +306,32 @@ class SendMessageScreenState extends State<SendMessageScreen> {
     );
   }
 
-  Widget _priorityChip(String label, int value) {
+  Widget _priorityChip(PriorityType priority) {
     final colorScheme = Theme.of(context).colorScheme;
-    final isSelected = _priority == value;
-
-    Color chipColor;
-    if (value >= 8) {
-      chipColor = colorScheme.error;
-    } else if (value >= 4) {
-      chipColor = const Color(0xFFF59E0B); // Warning color
-    } else {
-      chipColor = colorScheme.primary;
-    }
-
+    final isSelected = _priority == priority.numericValue;
+    final Color priorityColor =
+        AppTheme.getPriorityColor(context, priority.numericValue);
     return GestureDetector(
-      onTap: () => _updatePriorityValue(value),
+      onTap: () => _updatePriorityValue(priority.numericValue),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? chipColor.withValues(alpha: 0.15)
+              ? priorityColor.withValues(alpha: 0.15)
               : colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: isSelected
-                ? chipColor
+                ? priorityColor
                 : colorScheme.outline.withValues(alpha: 0.3),
           ),
         ),
         child: Text(
-          label,
+          priority.toString(),
           style: TextStyle(
             fontSize: 12,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-            color: isSelected ? chipColor : colorScheme.onSurface,
+            color: isSelected ? priorityColor : colorScheme.onSurface,
           ),
         ),
       ),
