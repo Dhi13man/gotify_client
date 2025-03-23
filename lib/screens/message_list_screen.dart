@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:gotify_client/providers/message_provider.dart';
 import 'package:gotify_client/models/message_model.dart';
+import 'package:gotify_client/components/priority_indicator.dart';
 import 'package:intl/intl.dart';
 
 class MessageListScreen extends StatefulWidget {
@@ -12,6 +13,8 @@ class MessageListScreen extends StatefulWidget {
 }
 
 class MessageListScreenState extends State<MessageListScreen> {
+  String _selectedFilter = 'All';
+
   @override
   void initState() {
     super.initState();
@@ -76,23 +79,137 @@ class MessageListScreenState extends State<MessageListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<MessageProvider>(
-      builder: (context, messageProvider, _) {
-        if (messageProvider.isLoading && messageProvider.messages.isEmpty) {
-          return _buildLoadingView();
-        }
+    return Column(
+      children: [
+        _buildFilterBar(),
+        Expanded(
+          child: Consumer<MessageProvider>(
+            builder: (context, messageProvider, _) {
+              if (messageProvider.isLoading &&
+                  messageProvider.messages.isEmpty) {
+                return _buildLoadingView();
+              }
 
-        if (messageProvider.error != null && messageProvider.messages.isEmpty) {
-          return _buildErrorView(messageProvider);
-        }
+              if (messageProvider.error != null &&
+                  messageProvider.messages.isEmpty) {
+                return _buildErrorView(messageProvider);
+              }
 
-        if (messageProvider.messages.isEmpty) {
-          return _buildEmptyView();
-        }
+              if (messageProvider.messages.isEmpty) {
+                return _buildEmptyView();
+              }
 
-        return _buildMessageList(messageProvider);
-      },
+              final filteredMessages =
+                  _filterMessages(messageProvider.messages);
+              final groupedMessages = _groupMessagesByDate(filteredMessages);
+
+              return _buildMessageList(groupedMessages);
+            },
+          ),
+        ),
+      ],
     );
+  }
+
+  Widget _buildFilterBar() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _buildFilterChip('All'),
+            const SizedBox(width: 8),
+            _buildFilterChip('High Priority'),
+            const SizedBox(width: 8),
+            _buildFilterChip('Medium Priority'),
+            const SizedBox(width: 8),
+            _buildFilterChip('Low Priority'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label) {
+    final isSelected = _selectedFilter == label;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() => _selectedFilter = label);
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? primaryColor : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? primaryColor : const Color(0xFFD1D5DB),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : const Color(0xFF6B7280),
+            fontSize: 14,
+            fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<Message> _filterMessages(List<Message> messages) {
+    switch (_selectedFilter) {
+      case 'High Priority':
+        return messages.where((message) => message.priority >= 8).toList();
+      case 'Medium Priority':
+        return messages
+            .where((message) => message.priority >= 4 && message.priority < 8)
+            .toList();
+      case 'Low Priority':
+        return messages.where((message) => message.priority < 4).toList();
+      default:
+        return messages;
+    }
+  }
+
+  Map<String, List<Message>> _groupMessagesByDate(List<Message> messages) {
+    final Map<String, List<Message>> grouped = {};
+
+    for (final message in messages) {
+      final dateKey = _getDateGroupKey(message.date);
+
+      if (!grouped.containsKey(dateKey)) {
+        grouped[dateKey] = [];
+      }
+
+      grouped[dateKey]!.add(message);
+    }
+
+    return grouped;
+  }
+
+  String _getDateGroupKey(String dateString) {
+    try {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      final yesterday = today.subtract(const Duration(days: 1));
+
+      final date = DateTime.parse(dateString).toLocal();
+      final messageDate = DateTime(date.year, date.month, date.day);
+
+      if (messageDate == today) {
+        return 'Today';
+      } else if (messageDate == yesterday) {
+        return 'Yesterday';
+      } else {
+        return DateFormat('MMMM d, yyyy').format(date);
+      }
+    } catch (e) {
+      return 'Other';
+    }
   }
 
   Widget _buildLoadingView() {
@@ -145,7 +262,9 @@ class MessageListScreenState extends State<MessageListScreen> {
           Icon(
             Icons.notifications_off_outlined,
             size: 80,
-            color: colorScheme.onSurface.withValues(alpha: 0.4),
+            color: Theme.of(context).brightness == Brightness.light
+                ? const Color(0xFFD1D5DB) // Gray-300
+                : const Color(0xFF6B7280), // Gray-500
           ),
           const SizedBox(height: 24),
           Text(
@@ -169,28 +288,125 @@ class MessageListScreenState extends State<MessageListScreen> {
     );
   }
 
-  Widget _buildMessageList(MessageProvider provider) {
+  Widget _buildMessageList(Map<String, List<Message>> groupedMessages) {
     return RefreshIndicator(
       onRefresh: _loadMessages,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(8),
-        itemCount: provider.messages.length,
-        itemBuilder: (context, index) {
-          final message = provider.messages[index];
-          return Dismissible(
-            key: Key('message-${message.id}'),
-            direction: DismissDirection.endToStart,
-            confirmDismiss: (_) => _confirmDismiss(message),
-            onDismissed: (_) => _deleteMessage(message),
-            background: Container(
-              alignment: Alignment.centerRight,
-              padding: const EdgeInsets.only(right: 20),
-              color: Theme.of(context).colorScheme.error,
-              child: const Icon(Icons.delete, color: Colors.white),
-            ),
-            child: _buildMessageCard(message),
-          );
-        },
+      child: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          for (final entry in groupedMessages.entries) ...[
+            _buildDateHeader(entry.key),
+            const SizedBox(height: 8),
+            ...entry.value.map((message) => _buildMessageCard(message)),
+            const SizedBox(height: 16),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDateHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, top: 8, bottom: 4),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: Theme.of(context).brightness == Brightness.light
+              ? const Color(0xFF6B7280) // Gray-500
+              : const Color(0xFF9CA3AF), // Gray-400
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMessageCard(Message message) {
+    return Dismissible(
+      key: Key('message-${message.id}'),
+      direction: DismissDirection.endToStart,
+      onDismissed: (_) => _deleteMessage(message),
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.error,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      confirmDismiss: (_) => _confirmDismiss(message),
+      child: Card(
+        margin: const EdgeInsets.only(bottom: 12),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  PriorityIndicator(priority: message.priority),
+                  Text(
+                    _formatTimeAgo(message.date),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).brightness == Brightness.light
+                          ? const Color(0xFF6B7280) // Gray-500
+                          : const Color(0xFF9CA3AF), // Gray-400
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 12,
+                    backgroundColor: Theme.of(context)
+                        .colorScheme
+                        .primary
+                        .withValues(alpha: 0.1),
+                    child: Text(
+                      message.appid.toString(),
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'App ID: ${message.appid}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Text(
+                message.title.isNotEmpty ? message.title : 'Notification',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                message.message,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).brightness == Brightness.light
+                      ? const Color(0xFF4B5563) // Gray-600
+                      : const Color(0xFFD1D5DB), // Gray-300
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -220,122 +436,30 @@ class MessageListScreenState extends State<MessageListScreen> {
         false; // Default to false if dialog returns null
   }
 
-  Widget _buildMessageCard(Message message) {
-    final priorityColor = _getPriorityColor(message.priority);
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-      elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: priorityColor.withAlpha(128),
-          width: 1,
-        ),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildMessageHeader(message, priorityColor),
-            _buildMessageContent(message),
-            _buildMessageFooter(message),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMessageHeader(Message message, Color priorityColor) {
-    return Container(
-      color: priorityColor.withAlpha(204), // Alpha 0.8 converted to int
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(
-              message.title.isNotEmpty ? message.title : 'Notification',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.white.withAlpha(51), // Alpha 0.2 converted to int
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Text(
-              'Priority ${message.priority}',
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.white, size: 20),
-            onPressed: () => _deleteMessage(message),
-            tooltip: 'Delete message',
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildMessageContent(Message message) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: SelectableText(
-        message.message,
-        style: const TextStyle(fontSize: 15),
-      ),
-    );
-  }
-
-  Widget _buildMessageFooter(Message message) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            'App ID: ${message.appid}',
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 12,
-            ),
-          ),
-          Text(
-            _formatDateTime(message.date),
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Utility methods moved to the class to avoid static dependencies
-  Color _getPriorityColor(int priority) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    if (priority >= 8) return colorScheme.error;
-    if (priority >= 4) return const Color(0xFFF59E0B); // Warning color
-    return colorScheme.primary;
-  }
-
   String _formatDateTime(String dateString) {
     try {
       final dateTime = DateTime.parse(dateString);
       return DateFormat('MMM d, y HH:mm').format(dateTime.toLocal());
+    } catch (e) {
+      return dateString;
+    }
+  }
+
+  String _formatTimeAgo(String dateString) {
+    try {
+      final now = DateTime.now();
+      final date = DateTime.parse(dateString).toLocal();
+      final difference = now.difference(date);
+
+      if (difference.inDays > 0) {
+        return _formatDateTime(dateString);
+      } else if (difference.inHours > 0) {
+        return '${difference.inHours}h ago';
+      } else if (difference.inMinutes > 0) {
+        return '${difference.inMinutes}m ago';
+      } else {
+        return 'Just now';
+      }
     } catch (e) {
       return dateString;
     }

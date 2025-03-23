@@ -53,7 +53,6 @@ class SendMessageScreenState extends State<SendMessageScreen> {
 
       if (success) {
         _showSuccessMessage();
-        Navigator.of(context).pop();
       } else {
         _showErrorMessage();
       }

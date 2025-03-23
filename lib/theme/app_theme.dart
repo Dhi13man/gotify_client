@@ -6,13 +6,15 @@ class AppTheme {
   // Private constructor to prevent instantiation
   AppTheme._();
 
-  // Color constants
+  // Color constants - updated to match the new design system
   static const Color _primaryLight = Color(0xFF3B82F6);
   static const Color _primaryContainerLight = Color(0xFFDBEAFE);
   static const Color _secondaryLight = Color(0xFF8B5CF6);
   static const Color _secondaryContainerLight = Color(0xFFEDE9FE);
   static const Color _surfaceLight = Color(0xFFF9FAFB);
   static const Color _errorLight = Color(0xFFEF4444);
+  static const Color _warningLight = Color(0xFFF59E0B);
+  static const Color _successLight = Color(0xFF10B981);
   static const Color _borderLight = Color(0xFFD1D5DB);
 
   static const Color _primaryDark = Color(0xFF60A5FA);
@@ -21,6 +23,8 @@ class AppTheme {
   static const Color _secondaryDark = Color(0xFFA78BFA);
   static const Color _surfaceDark = Color(0xFF1F2937);
   static const Color _errorDark = Color(0xFFF87171);
+  static const Color _warningDark = Color(0xFFFBBF24);
+  static const Color _successDark = Color(0xFF34D399);
 
   /// Returns the light theme for the application
   static ThemeData getLightTheme(BuildContext context) {
@@ -41,14 +45,15 @@ class AppTheme {
         onError: Colors.white,
       ),
       cardTheme: CardTheme(
-        elevation: 2,
+        elevation: 1, // Reduced elevation for subtle shadow
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
+        color: Colors.white,
       ),
       appBarTheme: const AppBarTheme(
-        color: _primaryLight,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white, // Updated to white background
+        foregroundColor: Colors.black87,
         elevation: 0,
         centerTitle: false,
       ),
@@ -58,7 +63,7 @@ class AppTheme {
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(24), // Rounded button style
           ),
         ),
       ),
@@ -73,6 +78,13 @@ class AppTheme {
         ),
         filled: true,
         fillColor: Colors.white,
+      ),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: Colors.white,
+        selectedItemColor: _primaryLight,
+        unselectedItemColor: Color(0xFF6B7280), // Gray-500
+        selectedLabelStyle: TextStyle(fontSize: 12),
+        unselectedLabelStyle: TextStyle(fontSize: 12),
       ),
     );
   }
@@ -95,17 +107,46 @@ class AppTheme {
       ),
       cardTheme: CardTheme(
         color: _surfaceDark,
-        elevation: 2,
+        elevation: 1,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
       ),
       appBarTheme: const AppBarTheme(
-        color: _primaryLight,
+        backgroundColor: Color(0xFF1F2937), // Dark background
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
       ),
+      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+        backgroundColor: Color(0xFF1F2937),
+        selectedItemColor: _primaryDark,
+        unselectedItemColor: Color(0xFF9CA3AF), // Gray-400
+        selectedLabelStyle: TextStyle(fontSize: 12),
+        unselectedLabelStyle: TextStyle(fontSize: 12),
+      ),
     );
+  }
+
+  // New utility methods for accessing semantic colors
+  static Color getWarningColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.light
+        ? _warningLight
+        : _warningDark;
+  }
+
+  static Color getSuccessColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.light
+        ? _successLight
+        : _successDark;
+  }
+
+  // Helper method for priority colors
+  static Color getPriorityColor(BuildContext context, int priority) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    if (priority >= 8) return colorScheme.error; // High priority
+    if (priority >= 4) return getWarningColor(context); // Medium priority
+    return colorScheme.primary; // Low priority
   }
 }

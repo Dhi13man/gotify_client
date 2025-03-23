@@ -10,18 +10,31 @@ class AppScaffold extends StatelessWidget {
   });
 
   final Widget body;
-
   final Widget bottomNavBar;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: Theme.of(context).brightness == Brightness.light
+          ? const Color(0xFFF9FAFB) // Gray-50
+          : const Color(0xFF1F2937), // Gray-800
       appBar: AppBar(
-        title: const Text(
-          'Gotify Messages',
-          style: TextStyle(fontWeight: FontWeight.w600),
+        title: Row(
+          children: [
+            Icon(
+              Icons.notifications,
+              color: Theme.of(context).colorScheme.primary,
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            const Text(
+              'Gotify Messages',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 18,
+              ),
+            ),
+          ],
         ),
         actions: [
           IconButton(
@@ -32,9 +45,25 @@ class AppScaffold extends StatelessWidget {
             },
           )
         ],
+        backgroundColor: Theme.of(context).brightness == Brightness.light
+            ? Colors.white
+            : const Color(0xFF1F2937), // Gray-800
+        elevation: 0,
       ),
       body: SafeArea(child: body),
-      bottomNavigationBar: bottomNavBar,
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(
+            top: BorderSide(
+              color: Theme.of(context).brightness == Brightness.light
+                  ? const Color(0xFFE5E7EB) // Gray-200
+                  : const Color(0xFF374151), // Gray-700
+              width: 1,
+            ),
+          ),
+        ),
+        child: bottomNavBar,
+      ),
     );
   }
 }
