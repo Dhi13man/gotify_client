@@ -14,7 +14,7 @@ class MessageService {
   MessageService(this._authState);
 
   void connect({Function(Message)? onMessage}) {
-    if (!_authState.isAuthenticated || _authState.clientToken == null) {
+    if (!_authState.isAuthenticated || _authState.token == null) {
       throw Exception('Not authenticated');
     }
 
@@ -24,7 +24,7 @@ class MessageService {
         .replaceFirst('https', 'ws')
         .replaceFirst('http', 'ws');
     _channel = IOWebSocketChannel.connect(
-      '$wsUrl/stream?token=${_authState.clientToken}',
+      '$wsUrl/stream?token=${_authState.token}',
     );
 
     _channel!.stream.listen(
@@ -64,7 +64,7 @@ class MessageService {
     try {
       final response = await http.get(
         Uri.parse('${_authState.serverUrl}/message'),
-        headers: {'X-Gotify-Key': _authState.clientToken ?? ''},
+        headers: {'X-Gotify-Key': _authState.token ?? ''},
       );
 
       if (response.statusCode == 200) {
@@ -89,7 +89,7 @@ class MessageService {
       final response = await http.post(
         Uri.parse('${_authState.serverUrl}/message'),
         headers: {
-          'X-Gotify-Key': _authState.clientToken ?? '',
+          'X-Gotify-Key': _authState.token ?? '',
           'Content-Type': 'application/json'
         },
         body: jsonEncode({

@@ -1,3 +1,4 @@
+/// Configuration for authentication
 class AuthConfig {
   final String serverUrl;
   final String? username;
@@ -11,10 +12,34 @@ class AuthConfig {
     this.clientToken,
   });
 
-  /// Validates if this configuration can be used for authentication
-  bool get isValid =>
-      serverUrl.isNotEmpty &&
-      (clientToken != null || (username != null && password != null));
+  /// Check if config has valid credentials (either token or username+password)
+  bool get isValid {
+    // Token authentication
+    if (clientToken != null && clientToken!.isNotEmpty) {
+      return true;
+    }
+
+    // Username/password authentication
+    return username != null &&
+        username!.isNotEmpty &&
+        password != null &&
+        password!.isNotEmpty;
+  }
+
+  /// Create a copy with modifications
+  AuthConfig copyWith({
+    String? serverUrl,
+    String? username,
+    String? password,
+    String? clientToken,
+  }) {
+    return AuthConfig(
+      serverUrl: serverUrl ?? this.serverUrl,
+      username: username ?? this.username,
+      password: password ?? this.password,
+      clientToken: clientToken ?? this.clientToken,
+    );
+  }
 
   @override
   String toString() => 'AuthConfig(serverUrl: $serverUrl, '
@@ -40,59 +65,72 @@ class AuthConfig {
       clientToken.hashCode;
 }
 
+/// Authentication state
 class AuthState {
-  final bool isAuthenticated;
   final String serverUrl;
-  final String? clientToken;
+  final String? token;
+  final bool isAuthenticated;
   final String? error;
 
   const AuthState({
-    required this.isAuthenticated,
     required this.serverUrl,
-    this.clientToken,
+    required this.isAuthenticated,
+    this.token,
     this.error,
   });
 
+  /// Initial unauthenticated state
   factory AuthState.initial() {
-    return const AuthState(
-      isAuthenticated: false,
-      serverUrl: '',
-      clientToken: null,
-      error: null,
-    );
+    return const AuthState(isAuthenticated: false, serverUrl: '');
   }
 
-  factory AuthState.error(String message, [String serverUrl = '']) {
+  /// Error state
+  factory AuthState.error(String error, [String serverUrl = '']) {
     return AuthState(
       isAuthenticated: false,
       serverUrl: serverUrl,
-      clientToken: null,
-      error: message,
+      error: error,
     );
   }
 
+  /// Authenticated state
+  factory AuthState.authenticated(String serverUrl, String token) {
+    return AuthState(
+      serverUrl: serverUrl,
+      token: token,
+      isAuthenticated: true,
+    );
+  }
+
+  /// Create a new state with cleared error
+  AuthState clearError() {
+    return AuthState(
+      serverUrl: serverUrl,
+      token: token,
+      isAuthenticated: isAuthenticated,
+    );
+  }
+
+  /// Create a copy with modifications
   AuthState copyWith({
-    bool? isAuthenticated,
     String? serverUrl,
-    String? clientToken,
+    String? token,
+    bool? isAuthenticated,
     String? error,
   }) {
     return AuthState(
-      isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       serverUrl: serverUrl ?? this.serverUrl,
-      clientToken: clientToken ?? this.clientToken,
+      token: token ?? this.token,
+      isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       error: error ?? this.error,
     );
   }
-
-  /// Clears error and returns new state
-  AuthState clearError() => copyWith(error: null);
 
   @override
   String toString() => 'AuthState('
       'isAuthenticated: $isAuthenticated, '
       'serverUrl: $serverUrl, '
-      'clientToken: ${clientToken != null ? '***' : 'null'}, '
+      'clientToken: ${token != null ? '***' : 'null'}, '
       'error: $error)';
 
   @override
@@ -101,7 +139,7 @@ class AuthState {
     return other is AuthState &&
         other.isAuthenticated == isAuthenticated &&
         other.serverUrl == serverUrl &&
-        other.clientToken == clientToken &&
+        other.token == token &&
         other.error == error;
   }
 
@@ -109,6 +147,6 @@ class AuthState {
   int get hashCode =>
       isAuthenticated.hashCode ^
       serverUrl.hashCode ^
-      clientToken.hashCode ^
+      token.hashCode ^
       error.hashCode;
 }

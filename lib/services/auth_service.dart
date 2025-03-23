@@ -37,7 +37,7 @@ class AuthService {
       return AuthState(
         isAuthenticated: authMap['isAuthenticated'] == true && token != null,
         serverUrl: authMap['serverUrl'] ?? '',
-        clientToken: token,
+        token: token,
         error: null,
       );
     } catch (e) {
@@ -80,7 +80,7 @@ class AuthService {
       final authState = AuthState(
         isAuthenticated: true,
         serverUrl: serverUrl,
-        clientToken: token,
+        token: token,
         error: null,
       );
       await _saveAuth(authState);
@@ -204,7 +204,7 @@ class AuthService {
     return AuthState(
       isAuthenticated: false,
       serverUrl: serverUrl,
-      clientToken: null,
+      token: null,
       error: errorMessage,
     );
   }
@@ -224,10 +224,10 @@ class AuthService {
       );
 
       // Store token securely if present
-      if (authState.clientToken != null && authState.clientToken!.isNotEmpty) {
+      if (authState.token != null && authState.token!.isNotEmpty) {
         await _secureStorage.write(
           key: _tokenKey,
-          value: authState.clientToken!,
+          value: authState.token!,
         );
       }
     } catch (e) {
