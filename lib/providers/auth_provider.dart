@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gotify_client/models/auth_models.dart';
 import 'package:gotify_client/services/auth_service.dart';
-import 'package:gotify_client/models/exceptions.dart';
 import 'package:logging/logging.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -35,11 +34,8 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       _authState = await _authService.loadAuth();
-    } catch (e, stackTrace) {
-      _logger.severe('Failed to initialize authentication', e, stackTrace);
-      final errorMessage =
-          AuthOperations.getErrorMessage(e, initializationErrorPrefix);
-      _authState = AuthState.error(errorMessage);
+    } catch (e) {
+      _authState = AuthState.error('$initializationErrorPrefix${e.toString()}');
     } finally {
       _setLoading(false);
     }
@@ -58,13 +54,9 @@ class AuthProvider extends ChangeNotifier {
     try {
       _authState = await _authService.login(config);
       return _authState.isAuthenticated;
-    } catch (e, stackTrace) {
-      _logger.warning('Login error', e, stackTrace);
-      final String errorMessage =
-          AuthOperations.getErrorMessage(e, loginErrorPrefix);
-      _authState = AuthState.error(errorMessage);
-      notifyListeners();
-      return _authState.isAuthenticated;
+    } catch (e) {
+      _authState = AuthState.error('$loginErrorPrefix${e.toString()}');
+      return false;
     } finally {
       _setLoading(false);
     }
@@ -77,12 +69,9 @@ class AuthProvider extends ChangeNotifier {
     try {
       await _authService.logout();
       _authState = AuthState.initial();
-    } catch (e, stackTrace) {
-      _logger.warning('Logout error', e, stackTrace);
+    } catch (e) {
       // Still consider user logged out even if there's an error clearing storage
-      final String errorMessage =
-          AuthOperations.getErrorMessage(e, logoutErrorPrefix);
-      _authState = AuthState.error(errorMessage);
+      _authState = AuthState.error('$logoutErrorPrefix${e.toString()}');
     } finally {
       _setLoading(false);
     }
@@ -101,17 +90,4 @@ class AuthProvider extends ChangeNotifier {
     _loading = value;
     notifyListeners();
   }
-}
-
-/// Helper for authentication operations
-class AuthOperations {
-  static String getErrorMessage(Object e, String prefix) {
-    if (e is AuthServiceException) {
-      return e.message;
-    }
-    return '$prefix${e.toString()}';
-  }
-
-  // Private constructor to prevent instantiation
-  AuthOperations._();
 }

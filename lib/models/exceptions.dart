@@ -1,34 +1,23 @@
 /// Base exception class for service-related errors
-abstract class ServiceException implements Exception {
+abstract class BaseException implements Exception {
   final String message;
   final int? statusCode;
 
-  ServiceException(this.message, {this.statusCode});
+  const BaseException(this.message, {this.statusCode});
 
   @override
   String toString() => '${runtimeType.toString()}: $message';
 }
 
-/// Authentication service specific exceptions
-class AuthServiceException extends ServiceException {
-  AuthServiceException(super.message, {super.statusCode});
+/// Client-related exceptions
+class ClientException extends BaseException {
+  const ClientException(super.message, {super.statusCode});
 }
 
-/// Message service specific exceptions
-class MessageServiceException extends ServiceException {
-  MessageServiceException(super.message, {super.statusCode});
+class ClientTimeoutException extends ClientException {
+  const ClientTimeoutException(super.message, {super.statusCode = 504});
 }
 
-class AuthenticationException extends MessageServiceException {
-  AuthenticationException(super.message, {super.statusCode});
-}
-
-/// Network-related exceptions
-class NetworkException extends ServiceException {
-  NetworkException(super.message, {super.statusCode});
-}
-
-/// Validation exceptions
-class ValidationException extends ServiceException {
-  ValidationException(super.message, {super.statusCode});
+class ClientAuthenticationException extends ClientException {
+  const ClientAuthenticationException(super.message, {super.statusCode = 401});
 }

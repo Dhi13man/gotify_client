@@ -22,16 +22,16 @@ class AppBottomNavigationBar extends StatelessWidget {
       currentIndex: currentIndex,
       items: const [
         BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
+          icon: Icon(Icons.list),
+          label: 'Messages',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.add),
           label: 'Send',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.list),
-          label: 'Messages',
+          icon: Icon(Icons.home),
+          label: 'Home',
         ),
       ],
       onTap: onTap,
