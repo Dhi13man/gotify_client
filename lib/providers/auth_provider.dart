@@ -35,12 +35,10 @@ class AuthProvider extends ChangeNotifier {
 
     try {
       _authState = await _authService.loadAuth();
-    } catch (e) {
-      _logger.severe('Failed to initialize authentication', e);
-      final errorMessage = AuthOperations.getErrorMessage(
-        e,
-        initializationErrorPrefix,
-      );
+    } catch (e, stackTrace) {
+      _logger.severe('Failed to initialize authentication', e, stackTrace);
+      final errorMessage =
+          AuthOperations.getErrorMessage(e, initializationErrorPrefix);
       _authState = AuthState.error(errorMessage);
     } finally {
       _setLoading(false);
@@ -49,7 +47,9 @@ class AuthProvider extends ChangeNotifier {
 
   /// Attempt to login using the provided configuration
   Future<bool> login(AuthConfig config) async {
-    if (!_validateConfig(config)) {
+    if (!config.isValid) {
+      _authState = AuthState.error(invalidConfigError);
+      notifyListeners();
       return false;
     }
 
@@ -58,29 +58,16 @@ class AuthProvider extends ChangeNotifier {
     try {
       _authState = await _authService.login(config);
       return _authState.isAuthenticated;
-    } catch (e) {
-      _handleLoginError(e, config.serverUrl);
-      return false;
+    } catch (e, stackTrace) {
+      _logger.warning('Login error', e, stackTrace);
+      final String errorMessage =
+          AuthOperations.getErrorMessage(e, loginErrorPrefix);
+      _authState = AuthState.error(errorMessage);
+      notifyListeners();
+      return _authState.isAuthenticated;
     } finally {
       _setLoading(false);
     }
-  }
-
-  /// Validates the auth configuration
-  bool _validateConfig(AuthConfig config) {
-    if (!config.isValid) {
-      _authState = AuthState.error(invalidConfigError);
-      notifyListeners();
-      return false;
-    }
-    return true;
-  }
-
-  /// Handle login errors
-  void _handleLoginError(Object e, String serverUrl) {
-    final message = AuthOperations.getErrorMessage(e, loginErrorPrefix);
-    _logger.warning('Login error', e);
-    _authState = AuthState.error(message, serverUrl);
   }
 
   /// Logout and clear authentication state
@@ -90,19 +77,15 @@ class AuthProvider extends ChangeNotifier {
     try {
       await _authService.logout();
       _authState = AuthState.initial();
-    } catch (e) {
-      _handleLogoutError(e);
+    } catch (e, stackTrace) {
+      _logger.warning('Logout error', e, stackTrace);
+      // Still consider user logged out even if there's an error clearing storage
+      final String errorMessage =
+          AuthOperations.getErrorMessage(e, logoutErrorPrefix);
+      _authState = AuthState.error(errorMessage);
     } finally {
       _setLoading(false);
     }
-  }
-
-  /// Handle logout errors
-  void _handleLogoutError(Object e) {
-    _logger.warning('Logout error', e);
-    // Still consider user logged out even if there's an error clearing storage
-    final errorMessage = AuthOperations.getErrorMessage(e, logoutErrorPrefix);
-    _authState = AuthState.error(errorMessage);
   }
 
   /// Clear any error state
@@ -128,4 +111,7 @@ class AuthOperations {
     }
     return '$prefix${e.toString()}';
   }
+
+  // Private constructor to prevent instantiation
+  AuthOperations._();
 }

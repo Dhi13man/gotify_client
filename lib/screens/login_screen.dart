@@ -33,8 +33,8 @@ class LoginScreenState extends State<LoginScreen> {
     }
 
     final config = _createAuthConfig();
-    final success = await _attemptLogin(config);
-
+    final success =
+        await Provider.of<AuthProvider>(context, listen: false).login(config);
     if (!success && mounted) {
       _showLoginError();
     }
@@ -49,10 +49,6 @@ class LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  Future<bool> _attemptLogin(AuthConfig config) async {
-    return Provider.of<AuthProvider>(context, listen: false).login(config);
-  }
-
   void _showLoginError() {
     final errorMessage =
         Provider.of<AuthProvider>(context, listen: false).error ??
@@ -64,10 +60,6 @@ class LoginScreenState extends State<LoginScreen> {
         duration: const Duration(seconds: 5),
       ),
     );
-  }
-
-  void _toggleAuthMethod(bool useToken) {
-    setState(() => _useToken = useToken);
   }
 
   @override
@@ -157,7 +149,7 @@ class LoginScreenState extends State<LoginScreen> {
           title: Text(
               _useToken ? 'Using Client Token' : 'Using Username & Password'),
           value: _useToken,
-          onChanged: _toggleAuthMethod,
+          onChanged: (useToken) => setState(() => _useToken = useToken),
         ),
       ],
     );

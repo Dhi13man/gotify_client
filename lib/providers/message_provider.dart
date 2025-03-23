@@ -8,6 +8,9 @@ import 'package:logging/logging.dart';
 class MessageValidation {
   static const int minPriority = 0;
   static const int maxPriority = 10;
+
+  // Private constructor to prevent instantiation
+  MessageValidation._();
 }
 
 class MessageProvider extends ChangeNotifier {
@@ -45,9 +48,9 @@ class MessageProvider extends ChangeNotifier {
       _messageService = _messageServiceFactory(authState);
       _messageService!.connect(onMessage: _handleNewMessage);
       loadMessages();
-    } catch (e) {
-      _logger.severe('Failed to initialize message service', e);
-      _setError('Failed to initialize message service: ${e.toString()}');
+    } catch (e, stack) {
+      _logger.severe('Failed to initialize message service', e, stack);
+      _setError('Failed to initialize message service: $e');
     }
   }
 
@@ -59,12 +62,21 @@ class MessageProvider extends ChangeNotifier {
 
   /// Disconnects the message service
   void _disconnect() {
+    if (_messageService == null) {
+      return;
+    }
+
     _messageService?.disconnect();
     _messageService = null;
   }
 
   /// Handles incoming messages from the websocket
   void _handleNewMessage(Message message) {
+    if (message.id <= 0) {
+      _logger.warning('Received message with invalid ID: ${message.id}');
+      return;
+    }
+
     _messages = [message, ..._messages];
     notifyListeners();
   }
@@ -76,11 +88,12 @@ class MessageProvider extends ChangeNotifier {
     _setLoading(true);
 
     try {
-      _messages = await _messageService!.getMessages();
+      final loadedMessages = await _messageService!.getMessages();
+      _messages = loadedMessages;
       _clearError();
-    } catch (e) {
-      _logger.warning('Failed to load messages', e);
-      _setError('Failed to load messages: ${e.toString()}');
+    } catch (e, stack) {
+      _logger.warning('Failed to load messages', e, stack);
+      _setError('Failed to load messages: $e');
     } finally {
       _setLoading(false);
     }
@@ -121,9 +134,9 @@ class MessageProvider extends ChangeNotifier {
         _setError('Failed to send message');
       }
       return success;
-    } catch (e) {
-      _logger.warning('Error sending message', e);
-      _setError('Error sending message: ${e.toString()}');
+    } catch (e, stack) {
+      _logger.warning('Error sending message', e, stack);
+      _setError('Error sending message: $e');
       return false;
     } finally {
       _setLoading(false);
@@ -131,13 +144,16 @@ class MessageProvider extends ChangeNotifier {
   }
 
   /// Validates message input parameters
-  String? _validateMessageInput(
-      {required String title, required String message, required int priority}) {
-    if (title.isEmpty) {
+  String? _validateMessageInput({
+    required String title,
+    required String message,
+    required int priority,
+  }) {
+    if (title.trim().isEmpty) {
       return 'Title cannot be empty';
     }
 
-    if (message.isEmpty) {
+    if (message.trim().isEmpty) {
       return 'Message cannot be empty';
     }
 

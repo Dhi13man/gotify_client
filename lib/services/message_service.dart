@@ -1,109 +1,247 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:gotify_client/models/message_model.dart';
 import 'package:gotify_client/models/auth_models.dart';
 import 'package:web_socket_channel/io.dart';
+import 'package:web_socket_channel/status.dart' as ws_status;
 import 'package:logging/logging.dart';
 
+/// Service that handles message operations with the Gotify server
 class MessageService {
+  static const Duration reconnectDelay = Duration(seconds: 5);
+  static const Duration httpTimeout = Duration(seconds: 10);
+  static const String messageEndpoint = '/message';
+  static const String streamEndpoint = '/stream';
+  static const int maxReconnectAttempts = 5;
+  static const Map<String, String> jsonContentType = {
+    'Content-Type': 'application/json'
+  };
+
   final AuthState _authState;
   IOWebSocketChannel? _channel;
-  Function(Message)? onMessageCallback;
+  bool _isConnecting = false;
+  bool _shouldReconnect = true;
+  int _reconnectAttempts = 0;
+
+  Function(Message)? _onMessageCallback;
   final Logger _logger = Logger('MessageService');
 
-  MessageService(this._authState);
-
-  void connect({Function(Message)? onMessage}) {
+  MessageService(this._authState) {
     if (!_authState.isAuthenticated || _authState.token == null) {
-      throw Exception('Not authenticated');
+      throw ArgumentError('MessageService requires authenticated AuthState');
+    }
+  }
+
+  /// Connect to the WebSocket stream
+  void connect({Function(Message)? onMessage}) {
+    if (_isConnecting) {
+      _logger.info('Connection attempt already in progress');
+      return;
     }
 
-    onMessageCallback = onMessage;
+    if (!_authState.isAuthenticated || _authState.token == null) {
+      throw StateError('Not authenticated');
+    }
 
-    final wsUrl = _authState.serverUrl
-        .replaceFirst('https', 'ws')
-        .replaceFirst('http', 'ws');
-    _channel = IOWebSocketChannel.connect(
-      '$wsUrl/stream?token=${_authState.token}',
-    );
-
-    _channel!.stream.listen(
-      (dynamic message) {
-        if (message is String) {
-          final data = jsonDecode(message);
-          final receivedMessage = Message.fromJson(data);
-          if (onMessageCallback != null) {
-            onMessageCallback!(receivedMessage);
-          }
-        }
-      },
-      onError: (error) {
-        _logger.warning('WebSocket error: $error');
-        _reconnect();
-      },
-      onDone: () {
-        _logger.info('WebSocket connection closed');
-        _reconnect();
-      },
-    );
+    _onMessageCallback = onMessage;
+    _shouldReconnect = true;
+    _reconnectAttempts = 0;
+    _connectWebSocket();
   }
 
-  void disconnect() {
-    _channel?.sink.close();
-    _channel = null;
+  /// Attempts to establish a WebSocket connection
+  void _connectWebSocket() {
+    if (_isConnecting) return;
+
+    _isConnecting = true;
+
+    try {
+      final wsUrl = _getWebSocketUrl();
+      _logger.info('Connecting to WebSocket at: $wsUrl');
+
+      _channel = IOWebSocketChannel.connect(
+        Uri.parse('$wsUrl$streamEndpoint?token=${_authState.token}'),
+        pingInterval: const Duration(seconds: 30),
+      );
+
+      _channel!.stream.listen(
+        _handleWebSocketMessage,
+        onError: _handleWebSocketError,
+        onDone: _handleWebSocketDone,
+        cancelOnError: false,
+      );
+
+      // Reset reconnect attempts on successful connection
+      _reconnectAttempts = 0;
+    } catch (e, stackTrace) {
+      _logger.severe('Error creating WebSocket connection', e, stackTrace);
+      _handleWebSocketError(e);
+    } finally {
+      _isConnecting = false;
+    }
   }
 
-  void _reconnect() {
-    disconnect();
-    Future.delayed(const Duration(seconds: 5), () {
-      connect(onMessage: onMessageCallback);
+  /// Converts HTTP URL to WebSocket URL
+  String _getWebSocketUrl() {
+    return _authState.serverUrl.replaceFirst('http', 'ws');
+  }
+
+  /// Handles messages from WebSocket
+  void _handleWebSocketMessage(dynamic message) {
+    if (message is! String) {
+      _logger.warning('Received non-string message: $message');
+      return;
+    }
+
+    try {
+      final data = jsonDecode(message);
+      final receivedMessage = Message.fromJson(data);
+      _onMessageCallback?.call(receivedMessage);
+    } catch (e, stackTrace) {
+      _logger.warning('Error processing WebSocket message', e, stackTrace);
+    }
+  }
+
+  /// Handles WebSocket errors
+  void _handleWebSocketError(Object error, [StackTrace? stackTrace]) {
+    _logger.warning('WebSocket error', error, stackTrace ?? StackTrace.current);
+    _attemptReconnect();
+  }
+
+  /// Handles WebSocket connection closure
+  void _handleWebSocketDone() {
+    _logger.info('WebSocket connection closed');
+    _attemptReconnect();
+  }
+
+  /// Attempts to reconnect to the WebSocket
+  void _attemptReconnect() {
+    _closeChannel();
+
+    if (!_shouldReconnect || _reconnectAttempts >= maxReconnectAttempts) {
+      _logger
+          .warning('Max reconnect attempts reached or reconnection disabled');
+      return;
+    }
+
+    _reconnectAttempts++;
+    _logger
+        .info('Reconnect attempt $_reconnectAttempts of $maxReconnectAttempts');
+
+    Future.delayed(reconnectDelay, () {
+      if (_shouldReconnect) {
+        _connectWebSocket();
+      }
     });
   }
 
+  /// Close the WebSocket channel safely
+  void _closeChannel() {
+    if (_channel != null) {
+      try {
+        _channel?.sink.close(ws_status.goingAway);
+      } catch (e, stackTrace) {
+        _logger.warning('Error closing WebSocket', e, stackTrace);
+      } finally {
+        _channel = null;
+      }
+    }
+  }
+
+  /// Disconnect from the WebSocket
+  void disconnect() {
+    _shouldReconnect = false;
+    _closeChannel();
+  }
+
+  /// Get messages from the server
   Future<List<Message>> getMessages() async {
+    if (_authState.token == null) {
+      _logger.severe('Token is null when trying to get messages');
+      return [];
+    }
+
     try {
       final response = await http.get(
-        Uri.parse('${_authState.serverUrl}/message'),
-        headers: {'X-Gotify-Key': _authState.token ?? ''},
-      );
+        Uri.parse('${_authState.serverUrl}$messageEndpoint'),
+        headers: {'X-Gotify-Key': _authState.token!},
+      ).timeout(httpTimeout);
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = jsonDecode(response.body)['messages'];
+        final responseBody = jsonDecode(response.body);
+        if (responseBody is! Map<String, dynamic> ||
+            !responseBody.containsKey('messages')) {
+          _logger.warning(
+              'Unexpected response format: ${response.body.substring(0, 100)}...');
+          return [];
+        }
+
+        final List<dynamic> data = responseBody['messages'];
         return data.map((json) => Message.fromJson(json)).toList();
       } else {
-        throw Exception('Failed to load messages');
+        _logger.warning('Failed to load messages: HTTP ${response.statusCode}');
+        throw _createMessageException('Failed to load messages', response);
       }
-    } catch (e) {
-      _logger.severe('Error getting messages: $e');
+    } on TimeoutException {
+      _logger.warning('Request timeout when getting messages');
+      return [];
+    } catch (e, stackTrace) {
+      _logger.severe('Error getting messages', e, stackTrace);
       return [];
     }
   }
 
+  /// Send a message to the server
   Future<bool> sendMessage({
     required String title,
     required String message,
     required int priority,
     required int applicationId,
   }) async {
-    try {
-      final response = await http.post(
-        Uri.parse('${_authState.serverUrl}/message'),
-        headers: {
-          'X-Gotify-Key': _authState.token ?? '',
-          'Content-Type': 'application/json'
-        },
-        body: jsonEncode({
-          'title': title,
-          'message': message,
-          'priority': priority,
-          'extras': {'client': 'flutter'},
-        }),
-      );
-
-      return response.statusCode == 200;
-    } catch (e) {
-      _logger.severe('Error sending message: $e');
+    if (_authState.token == null) {
+      _logger.severe('Token is null when trying to send message');
       return false;
     }
+
+    try {
+      final response = await http
+          .post(
+            Uri.parse('${_authState.serverUrl}$messageEndpoint'),
+            headers: {'X-Gotify-Key': _authState.token!, ...jsonContentType},
+            body: jsonEncode({
+              'title': title,
+              'message': message,
+              'priority': priority,
+              'extras': {'client': 'flutter', 'appId': applicationId},
+            }),
+          )
+          .timeout(httpTimeout);
+
+      if (response.statusCode != 200) {
+        _logger.warning('Failed to send message: HTTP ${response.statusCode}');
+        throw _createMessageException('Failed to send message', response);
+      }
+
+      return true;
+    } on TimeoutException {
+      _logger.warning('Request timeout when sending message');
+      return false;
+    } catch (e, stackTrace) {
+      _logger.severe('Error sending message', e, stackTrace);
+      return false;
+    }
+  }
+
+  /// Create exception with details from HTTP response
+  Exception _createMessageException(String message, http.Response response) {
+    String errorDetails = response.reasonPhrase ?? 'Unknown error';
+    try {
+      final body = jsonDecode(response.body);
+      errorDetails = body['error'] ?? body['message'] ?? errorDetails;
+    } catch (e) {
+      // Use the default error message if JSON parsing fails
+    }
+    return Exception('$message (${response.statusCode}): $errorDetails');
   }
 }
