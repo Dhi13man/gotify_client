@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:gotify_client/models/exceptions.dart';
 import 'package:http/http.dart' as http;
 import 'package:gotify_client/models/message_model.dart';
 import 'package:gotify_client/models/auth_models.dart';
@@ -157,10 +158,7 @@ class MessageService {
 
   /// Get messages from the server
   Future<List<Message>> getMessages() async {
-    if (_authState.token == null) {
-      _logger.severe('Token is null when trying to get messages');
-      return [];
-    }
+    _validateAuthentication();
 
     try {
       final response = await http.get(
@@ -179,16 +177,25 @@ class MessageService {
 
         final List<dynamic> data = responseBody['messages'];
         return data.map((json) => Message.fromJson(json)).toList();
+      } else if (response.statusCode == 401) {
+        _logger
+            .warning('Authentication failure (HTTP 401) when getting messages');
+        _handleAuthenticationFailure();
+        throw AuthenticationException('Authentication failed', statusCode: 401);
       } else {
         _logger.warning('Failed to load messages: HTTP ${response.statusCode}');
         throw _createMessageException('Failed to load messages', response);
       }
     } on TimeoutException {
       _logger.warning('Request timeout when getting messages');
-      return [];
+      throw MessageServiceException('Request timed out', statusCode: 504);
+    } on MessageServiceException {
+      rethrow;
     } catch (e, stackTrace) {
       _logger.severe('Error getting messages', e, stackTrace);
-      return [];
+      throw MessageServiceException(
+        'Failed to retrieve messages: ${e.toString()}',
+      );
     }
   }
 
@@ -199,10 +206,7 @@ class MessageService {
     required int priority,
     required int applicationId,
   }) async {
-    if (_authState.token == null) {
-      _logger.severe('Token is null when trying to send message');
-      return false;
-    }
+    _validateAuthentication();
 
     try {
       final response = await http
@@ -213,28 +217,43 @@ class MessageService {
               'title': title,
               'message': message,
               'priority': priority,
-              'extras': {'client': 'flutter', 'appId': applicationId},
             }),
           )
           .timeout(httpTimeout);
 
-      if (response.statusCode != 200) {
+      if (response.statusCode == 200) {
+        return true;
+      } else if (response.statusCode == 401) {
+        _logger
+            .warning('Authentication failure (HTTP 401) when sending message');
+        _handleAuthenticationFailure();
+        throw AuthenticationException('Authentication failed', statusCode: 401);
+      } else {
         _logger.warning('Failed to send message: HTTP ${response.statusCode}');
         throw _createMessageException('Failed to send message', response);
       }
-
-      return true;
     } on TimeoutException {
       _logger.warning('Request timeout when sending message');
-      return false;
+      throw MessageServiceException('Request timed out', statusCode: 504);
+    } on MessageServiceException {
+      rethrow;
     } catch (e, stackTrace) {
       _logger.severe('Error sending message', e, stackTrace);
-      return false;
+      throw MessageServiceException('Failed to send message: ${e.toString()}');
     }
   }
 
+  /// Handle authentication failures
+  void _handleAuthenticationFailure() {
+    // Disconnect the websocket as the token is no longer valid
+    disconnect();
+  }
+
   /// Create exception with details from HTTP response
-  Exception _createMessageException(String message, http.Response response) {
+  MessageServiceException _createMessageException(
+    String message,
+    http.Response response,
+  ) {
     String errorDetails = response.reasonPhrase ?? 'Unknown error';
     try {
       final body = jsonDecode(response.body);
@@ -242,6 +261,16 @@ class MessageService {
     } catch (e) {
       // Use the default error message if JSON parsing fails
     }
-    return Exception('$message (${response.statusCode}): $errorDetails');
+
+    return MessageServiceException(
+      '$message: $errorDetails',
+      statusCode: response.statusCode,
+    );
+  }
+
+  void _validateAuthentication() {
+    if (!_authState.isAuthenticated || _authState.token == null) {
+      throw AuthenticationException('Not authenticated');
+    }
   }
 }
