@@ -248,22 +248,21 @@ class MessageService {
     _validateAuthentication();
 
     try {
-      final response = await http
-          .delete(
-            Uri.parse('${_authState.serverUrl}$messageEndpoint/$messageId'),
-            headers: {'X-Gotify-Key': _authState.token!},
-          )
-          .timeout(httpTimeout);
+      final response = await http.delete(
+        Uri.parse('${_authState.serverUrl}$messageEndpoint/$messageId'),
+        headers: {'X-Gotify-Key': _authState.token!},
+      ).timeout(httpTimeout);
 
       if (response.statusCode == 200 || response.statusCode == 204) {
         return true;
       } else if (response.statusCode == 401) {
-        _logger.warning(
-            'Authentication failure (HTTP 401) when deleting message');
+        _logger
+            .warning('Authentication failure (HTTP 401) when deleting message');
         _handleAuthenticationFailure();
         throw AuthenticationException('Authentication failed', statusCode: 401);
       } else {
-        _logger.warning('Failed to delete message: HTTP ${response.statusCode}');
+        _logger
+            .warning('Failed to delete message: HTTP ${response.statusCode}');
         throw _createMessageException('Failed to delete message', response);
       }
     } on TimeoutException {
@@ -273,7 +272,8 @@ class MessageService {
       rethrow;
     } catch (e, stackTrace) {
       _logger.severe('Error deleting message', e, stackTrace);
-      throw MessageServiceException('Failed to delete message: ${e.toString()}');
+      throw MessageServiceException(
+          'Failed to delete message: ${e.toString()}');
     }
   }
 

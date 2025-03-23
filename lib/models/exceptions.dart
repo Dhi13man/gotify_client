@@ -23,7 +23,6 @@ class AuthenticationException extends MessageServiceException {
   AuthenticationException(super.message, {super.statusCode});
 }
 
-
 /// Network-related exceptions
 class NetworkException extends ServiceException {
   NetworkException(super.message, {super.statusCode});

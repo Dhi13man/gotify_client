@@ -29,7 +29,9 @@ class MessageListScreenState extends State<MessageListScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Message'),
-        content: Text('Are you sure you want to delete this message: "${message.title}"?'),
+        content: Text(
+          'Are you sure you want to delete this message: "${message.title}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -47,14 +49,17 @@ class MessageListScreenState extends State<MessageListScreen> {
       final scaffoldMessenger = ScaffoldMessenger.of(context);
       final result = await Provider.of<MessageProvider>(context, listen: false)
           .deleteMessage(message.id);
-      
+
       if (result) {
         scaffoldMessenger.showSnackBar(
           const SnackBar(content: Text('Message deleted successfully')),
         );
       } else {
         scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text('Failed to delete message'), backgroundColor: Colors.red),
+          const SnackBar(
+            content: Text('Failed to delete message'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
@@ -152,7 +157,8 @@ class MessageListScreenState extends State<MessageListScreen> {
                 context: context,
                 builder: (context) => AlertDialog(
                   title: const Text('Delete Message'),
-                  content: Text('Are you sure you want to delete this message?'),
+                  content:
+                      Text('Are you sure you want to delete this message?'),
                   actions: [
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(false),
@@ -160,7 +166,10 @@ class MessageListScreenState extends State<MessageListScreen> {
                     ),
                     TextButton(
                       onPressed: () => Navigator.of(context).pop(true),
-                      child: const Text('DELETE', style: TextStyle(color: Colors.red)),
+                      child: const Text(
+                        'DELETE',
+                        style: TextStyle(color: Colors.red),
+                      ),
                     ),
                   ],
                 ),

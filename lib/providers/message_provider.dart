@@ -151,7 +151,7 @@ class MessageProvider extends ChangeNotifier {
 
     try {
       final success = await _messageService!.deleteMessage(messageId);
-      
+
       if (success) {
         // Remove the message from local state
         _messages = _messages.where((m) => m.id != messageId).toList();
