@@ -1,4 +1,10 @@
 class Message {
+  // Constants for defaults
+  static const int defaultId = 0;
+  static const int defaultPriority = 0;
+  static const int defaultAppId = 0;
+  static const String defaultString = '';
+
   final int id;
   final String title;
   final String message;
@@ -19,20 +25,24 @@ class Message {
 
   factory Message.fromJson(Map<String, dynamic> json) {
     return Message(
-      id: json['id'] is int
-          ? json['id']
-          : int.tryParse(json['id'].toString()) ?? 0,
-      title: json['title'] as String? ?? '',
-      message: json['message'] as String? ?? '',
-      priority: json['priority'] is int
-          ? json['priority']
-          : int.tryParse(json['priority'].toString()) ?? 0,
-      date: json['date'] as String? ?? '',
-      appid: json['appid'] is int
-          ? json['appid']
-          : int.tryParse(json['appid'].toString()) ?? 0,
+      id: _parseIntSafely(json['id'], defaultId),
+      title: json['title'] as String? ?? defaultString,
+      message: json['message'] as String? ?? defaultString,
+      priority: _parseIntSafely(json['priority'], defaultPriority),
+      date: json['date'] as String? ?? defaultString,
+      appid: _parseIntSafely(json['appid'], defaultAppId),
       extras: json['extras'] as Map<String, dynamic>?,
     );
+  }
+
+  /// Safely parses integer values from various types
+  static int _parseIntSafely(dynamic value, int defaultValue) {
+    if (value == null) return defaultValue;
+    if (value is int) return value;
+    if (value is String) {
+      return int.tryParse(value) ?? defaultValue;
+    }
+    return defaultValue;
   }
 
   Map<String, dynamic> toJson() => {

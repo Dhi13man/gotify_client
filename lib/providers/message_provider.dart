@@ -4,10 +4,16 @@ import 'package:gotify_client/services/message_service.dart';
 import 'package:gotify_client/models/auth_models.dart';
 import 'package:logging/logging.dart';
 
+/// Constants for message validation
+class MessageValidation {
+  static const int minPriority = 0;
+  static const int maxPriority = 10;
+}
+
 class MessageProvider extends ChangeNotifier {
-  // Static logger instead of dependency injected
   static final _logger = Logger('MessageProvider');
 
+  final MessageService? Function(AuthState) _messageServiceFactory;
   MessageService? _messageService;
   List<Message> _messages = [];
   bool _loading = false;
@@ -19,33 +25,42 @@ class MessageProvider extends ChangeNotifier {
   String? get error => _error;
   bool get isInitialized => _messageService != null;
 
+  /// Constructor with dependency injection for testability
+  MessageProvider({
+    MessageService? Function(AuthState)? messageServiceFactory,
+  }) : _messageServiceFactory =
+            messageServiceFactory ?? ((authState) => MessageService(authState));
+
   /// Initializes the message service with authentication state
   void initialize(AuthState authState) {
     if (!authState.isAuthenticated) {
-      _error = 'Cannot initialize: Not authenticated';
-      notifyListeners();
+      _setError('Cannot initialize: Not authenticated');
       return;
     }
 
     // Cleanup previous connection if any
-    _messageService?.disconnect();
+    _disconnect();
 
     try {
-      _messageService = MessageService(authState);
+      _messageService = _messageServiceFactory(authState);
       _messageService!.connect(onMessage: _handleNewMessage);
       loadMessages();
     } catch (e) {
       _logger.severe('Failed to initialize message service', e);
-      _error = 'Failed to initialize message service: ${e.toString()}';
-      notifyListeners();
+      _setError('Failed to initialize message service: ${e.toString()}');
     }
   }
 
   @override
   void dispose() {
+    _disconnect();
+    super.dispose();
+  }
+
+  /// Disconnects the message service
+  void _disconnect() {
     _messageService?.disconnect();
     _messageService = null;
-    super.dispose();
   }
 
   /// Handles incoming messages from the websocket
@@ -56,20 +71,16 @@ class MessageProvider extends ChangeNotifier {
 
   /// Loads messages from the server
   Future<void> loadMessages() async {
-    if (_messageService == null) {
-      _error = 'Message service not initialized';
-      notifyListeners();
-      return;
-    }
+    if (!_checkServiceInitialized()) return;
 
     _setLoading(true);
 
     try {
       _messages = await _messageService!.getMessages();
-      _error = null;
+      _clearError();
     } catch (e) {
       _logger.warning('Failed to load messages', e);
-      _error = 'Failed to load messages: ${e.toString()}';
+      _setError('Failed to load messages: ${e.toString()}');
     } finally {
       _setLoading(false);
     }
@@ -82,21 +93,15 @@ class MessageProvider extends ChangeNotifier {
     required int priority,
     required int applicationId,
   }) async {
-    if (_messageService == null) {
-      _error = 'Message service not initialized';
-      notifyListeners();
-      return false;
-    }
+    // Validate service initialization
+    if (!_checkServiceInitialized()) return false;
 
-    if (title.isEmpty || message.isEmpty) {
-      _error = 'Title and message cannot be empty';
-      notifyListeners();
-      return false;
-    }
+    // Input validation
+    final validationError = _validateMessageInput(
+        title: title, message: message, priority: priority);
 
-    if (priority < 0 || priority > 10) {
-      _error = 'Priority must be between 0 and 10';
-      notifyListeners();
+    if (validationError != null) {
+      _setError(validationError);
       return false;
     }
 
@@ -109,20 +114,67 @@ class MessageProvider extends ChangeNotifier {
         priority: priority,
         applicationId: applicationId,
       );
-      _error = success ? null : 'Failed to send message';
+
+      if (success) {
+        _clearError();
+      } else {
+        _setError('Failed to send message');
+      }
       return success;
     } catch (e) {
       _logger.warning('Error sending message', e);
-      _error = 'Error sending message: ${e.toString()}';
+      _setError('Error sending message: ${e.toString()}');
       return false;
     } finally {
       _setLoading(false);
     }
   }
 
+  /// Validates message input parameters
+  String? _validateMessageInput(
+      {required String title, required String message, required int priority}) {
+    if (title.isEmpty) {
+      return 'Title cannot be empty';
+    }
+
+    if (message.isEmpty) {
+      return 'Message cannot be empty';
+    }
+
+    if (priority < MessageValidation.minPriority ||
+        priority > MessageValidation.maxPriority) {
+      return 'Priority must be between ${MessageValidation.minPriority} and ${MessageValidation.maxPriority}';
+    }
+
+    return null;
+  }
+
+  /// Checks if service is initialized and sets error if not
+  bool _checkServiceInitialized() {
+    if (_messageService == null) {
+      _setError('Message service not initialized');
+      return false;
+    }
+    return true;
+  }
+
   /// Helper to set loading state and notify listeners
   void _setLoading(bool loading) {
     _loading = loading;
     notifyListeners();
+  }
+
+  /// Helper to set error state
+  void _setError(String error) {
+    _error = error;
+    notifyListeners();
+  }
+
+  /// Helper to clear error state
+  void _clearError() {
+    if (_error != null) {
+      _error = null;
+      notifyListeners();
+    }
   }
 }
