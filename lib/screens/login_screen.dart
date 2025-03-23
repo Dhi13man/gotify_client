@@ -56,7 +56,7 @@ class LoginScreenState extends State<LoginScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(errorMessage),
-        backgroundColor: Colors.red,
+        backgroundColor: Theme.of(context).colorScheme.error,
         duration: const Duration(seconds: 5),
       ),
     );
@@ -64,8 +64,10 @@ class LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: colorScheme.surface,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -80,8 +82,13 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildLoginCard() {
+    final colorScheme = Theme.of(context).colorScheme;
+    colorScheme;
+
     return Card(
-      elevation: 8,
+      elevation: 3,
+      surfaceTintColor: Colors.white,
+      color: Theme.of(context).cardTheme.color,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
       ),
@@ -92,20 +99,32 @@ class LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'Gotify Client',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.notifications_active,
+                    size: 28,
+                    color: colorScheme.primary,
+                  ),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Gotify Client',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
               _buildServerUrlField(),
-              const SizedBox(height: 16),
-              _buildAuthMethodSelector(),
-              const SizedBox(height: 16),
-              _useToken ? _buildTokenField() : _buildCredentialFields(),
               const SizedBox(height: 24),
+              _buildAuthMethodSelector(),
+              const SizedBox(height: 24),
+              _useToken ? _buildTokenField() : _buildCredentialFields(),
+              const SizedBox(height: 32),
               _buildLoginButton(),
               _buildErrorMessage(),
             ],
@@ -121,10 +140,8 @@ class LoginScreenState extends State<LoginScreen> {
       decoration: InputDecoration(
         labelText: 'Server URL',
         hintText: 'https://gotify.example.com',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        prefixIcon: const Icon(Icons.link),
+        prefixIcon:
+            Icon(Icons.link, color: Theme.of(context).colorScheme.primary),
       ),
       validator: AuthFormValidator.validateServerUrl,
       keyboardType: TextInputType.url,
@@ -132,24 +149,52 @@ class LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildAuthMethodSelector() {
+    final colorScheme = Theme.of(context).colorScheme;
+    colorScheme;
+
     return Column(
       children: [
-        const Row(
+        Row(
           children: [
-            Expanded(child: Divider()),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Text('Authentication Method'),
+            Expanded(
+              child: Divider(color: colorScheme.outline.withValues(alpha: 0.5)),
             ),
-            Expanded(child: Divider()),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Text(
+                'Authentication Method',
+                style: TextStyle(
+                  color: colorScheme.secondary,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            Expanded(
+              child: Divider(color: colorScheme.outline.withValues(alpha: 0.5)),
+            ),
           ],
         ),
-        const SizedBox(height: 8),
-        SwitchListTile(
-          title: Text(
-              _useToken ? 'Using Client Token' : 'Using Username & Password'),
-          value: _useToken,
-          onChanged: (useToken) => setState(() => _useToken = useToken),
+        const SizedBox(height: 16),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.3),
+            ),
+            color: colorScheme.surface,
+          ),
+          child: SwitchListTile(
+            title: Text(
+              _useToken ? 'Using Client Token' : 'Using Username & Password',
+              style: TextStyle(
+                fontWeight: FontWeight.w500,
+                color: colorScheme.onSurface,
+              ),
+            ),
+            activeColor: colorScheme.primary,
+            value: _useToken,
+            onChanged: (useToken) => setState(() => _useToken = useToken),
+          ),
         ),
       ],
     );
@@ -160,10 +205,8 @@ class LoginScreenState extends State<LoginScreen> {
       controller: _tokenController,
       decoration: InputDecoration(
         labelText: 'Client Token',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        prefixIcon: const Icon(Icons.vpn_key),
+        prefixIcon:
+            Icon(Icons.vpn_key, color: Theme.of(context).colorScheme.primary),
       ),
       validator: AuthFormValidator.validateToken,
       obscureText: true,
@@ -177,22 +220,18 @@ class LoginScreenState extends State<LoginScreen> {
           controller: _usernameController,
           decoration: InputDecoration(
             labelText: 'Username',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            prefixIcon: const Icon(Icons.person),
+            prefixIcon: Icon(Icons.person,
+                color: Theme.of(context).colorScheme.primary),
           ),
           validator: AuthFormValidator.validateUsername,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
         TextFormField(
           controller: _passwordController,
           decoration: InputDecoration(
             labelText: 'Password',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            prefixIcon: const Icon(Icons.lock),
+            prefixIcon:
+                Icon(Icons.lock, color: Theme.of(context).colorScheme.primary),
           ),
           validator: AuthFormValidator.validatePassword,
           obscureText: true,
@@ -209,16 +248,18 @@ class LoginScreenState extends State<LoginScreen> {
       height: 50,
       child: ElevatedButton(
         onPressed: authProvider.isLoading ? null : _login,
-        style: ElevatedButton.styleFrom(
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          backgroundColor: Colors.blue[700],
-        ),
         child: authProvider.isLoading
-            ? const CircularProgressIndicator(color: Colors.white)
+            ? SizedBox(
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              )
             : const Text(
                 'Login',
-                style: TextStyle(fontSize: 18, color: Colors.white),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
               ),
       ),
     );
@@ -232,7 +273,13 @@ class LoginScreenState extends State<LoginScreen> {
 
     return Padding(
       padding: const EdgeInsets.only(top: 16),
-      child: Text(error, style: const TextStyle(color: Colors.red)),
+      child: Text(
+        error,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.error,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
     );
   }
 }

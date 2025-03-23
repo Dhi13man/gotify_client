@@ -24,52 +24,69 @@ class MessageListScreenState extends State<MessageListScreen> {
     await Provider.of<MessageProvider>(context, listen: false).loadMessages();
   }
 
-  Future<void> _deleteMessage(BuildContext context, Message message) async {
+  Future<void> _deleteMessage(Message message) async {
+    // Store context objects before async operation
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final colorScheme = Theme.of(context).colorScheme;
+    final messageProvider =
+        Provider.of<MessageProvider>(context, listen: false);
+
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Delete Message'),
         content: Text(
           'Are you sure you want to delete this message: "${message.title}"?',
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('CANCEL'),
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text('CANCEL', style: TextStyle(color: colorScheme.primary)),
           ),
           TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('DELETE', style: TextStyle(color: Colors.red)),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text('DELETE', style: TextStyle(color: colorScheme.error)),
           ),
         ],
       ),
     );
 
-    if (confirmed == true) {
-      final scaffoldMessenger = ScaffoldMessenger.of(context);
-      final result = await Provider.of<MessageProvider>(context, listen: false)
-          .deleteMessage(message.id);
+    if (confirmed != true || !mounted) {
+      return;
+    }
 
-      if (result) {
-        scaffoldMessenger.showSnackBar(
-          const SnackBar(content: Text('Message deleted successfully')),
-        );
-      } else {
-        scaffoldMessenger.showSnackBar(
-          const SnackBar(
-            content: Text('Failed to delete message'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+    final result = await messageProvider.deleteMessage(message.id);
+
+    if (!mounted) return;
+
+    if (result) {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: const Text('Message deleted successfully'),
+          backgroundColor: colorScheme.primary,
+        ),
+      );
+    } else {
+      scaffoldMessenger.showSnackBar(
+        SnackBar(
+          content: const Text('Failed to delete message'),
+          backgroundColor: colorScheme.error,
+        ),
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
+      backgroundColor: colorScheme.surface,
       appBar: AppBar(
-        title: const Text('Gotify Messages'),
+        title: const Text(
+          'Gotify Messages',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
         actions: [
           IconButton(icon: const Icon(Icons.refresh), onPressed: _loadMessages),
           IconButton(icon: const Icon(Icons.logout), onPressed: _logout)
@@ -94,8 +111,14 @@ class MessageListScreenState extends State<MessageListScreen> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToSendMessage(context),
+        onPressed: _navigateToSendMessage,
         tooltip: 'Send Message',
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         child: const Icon(Icons.send),
       ),
     );
@@ -106,19 +129,35 @@ class MessageListScreenState extends State<MessageListScreen> {
   }
 
   Widget _buildErrorView(MessageProvider provider) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(
-            'Error: ${provider.error}',
-            style: const TextStyle(color: Colors.red),
-            textAlign: TextAlign.center,
+          Icon(
+            Icons.error_outline,
+            size: 64,
+            color: colorScheme.error,
           ),
           const SizedBox(height: 16),
-          ElevatedButton(
+          Text(
+            'Error: ${provider.error}',
+            style: TextStyle(
+              color: colorScheme.error,
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton.icon(
             onPressed: _loadMessages,
-            child: const Text('Retry'),
+            icon: const Icon(Icons.refresh),
+            label: const Text('Retry'),
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            ),
           ),
         ],
       ),
@@ -126,15 +165,33 @@ class MessageListScreenState extends State<MessageListScreen> {
   }
 
   Widget _buildEmptyView() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.notifications_off, size: 64, color: Colors.grey[400]),
-          const SizedBox(height: 16),
+          Icon(
+            Icons.notifications_off_outlined,
+            size: 80,
+            color: colorScheme.onSurface.withValues(alpha: 0.4),
+          ),
+          const SizedBox(height: 24),
           Text(
             'No messages yet',
-            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+            style: TextStyle(
+              fontSize: 20,
+              color: colorScheme.onSurface.withValues(alpha: 0.7),
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Notifications will appear here',
+            style: TextStyle(
+              fontSize: 16,
+              color: colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
           ),
         ],
       ),
@@ -152,34 +209,12 @@ class MessageListScreenState extends State<MessageListScreen> {
           return Dismissible(
             key: Key('message-${message.id}'),
             direction: DismissDirection.endToStart,
-            confirmDismiss: (_) async {
-              return await showDialog<bool>(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Delete Message'),
-                  content:
-                      Text('Are you sure you want to delete this message?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(false),
-                      child: const Text('CANCEL'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(true),
-                      child: const Text(
-                        'DELETE',
-                        style: TextStyle(color: Colors.red),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-            onDismissed: (_) => _deleteMessage(context, message),
+            confirmDismiss: (_) => _confirmDismiss(message),
+            onDismissed: (_) => _deleteMessage(message),
             background: Container(
               alignment: Alignment.centerRight,
               padding: const EdgeInsets.only(right: 20),
-              color: Colors.red,
+              color: Theme.of(context).colorScheme.error,
               child: const Icon(Icons.delete, color: Colors.white),
             ),
             child: _buildMessageCard(message),
@@ -189,8 +224,33 @@ class MessageListScreenState extends State<MessageListScreen> {
     );
   }
 
+  Future<bool> _confirmDismiss(Message message) async {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return await showDialog<bool>(
+          context: context,
+          builder: (dialogContext) => AlertDialog(
+            title: const Text('Delete Message'),
+            content: Text('Are you sure you want to delete this message?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(false),
+                child: Text('CANCEL',
+                    style: TextStyle(color: colorScheme.primary)),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(dialogContext).pop(true),
+                child:
+                    Text('DELETE', style: TextStyle(color: colorScheme.error)),
+              ),
+            ],
+          ),
+        ) ??
+        false; // Default to false if dialog returns null
+  }
+
   Widget _buildMessageCard(Message message) {
-    final priorityColor = MessageUIUtils.getPriorityColor(message.priority);
+    final priorityColor = _getPriorityColor(message.priority);
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
       elevation: 2,
@@ -247,7 +307,7 @@ class MessageListScreenState extends State<MessageListScreen> {
           ),
           IconButton(
             icon: const Icon(Icons.delete, color: Colors.white, size: 20),
-            onPressed: () => _deleteMessage(context, message),
+            onPressed: () => _deleteMessage(message),
             tooltip: 'Delete message',
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -281,7 +341,7 @@ class MessageListScreenState extends State<MessageListScreen> {
             ),
           ),
           Text(
-            MessageUIUtils.formatDateTime(message.date),
+            _formatDateTime(message.date),
             style: TextStyle(
               color: Colors.grey[600],
               fontSize: 12,
@@ -292,34 +352,32 @@ class MessageListScreenState extends State<MessageListScreen> {
     );
   }
 
-  void _navigateToSendMessage(BuildContext context) {
+  void _navigateToSendMessage() {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => const SendMessageScreen()),
     );
   }
 
   void _logout() {
-    // Implement logout functionality
-    // This could involve clearing authentication tokens, navigating to a login screen, etc.
     Provider.of<AuthProvider>(context, listen: false).logout();
     Navigator.of(context).pushReplacementNamed('/login');
   }
-}
 
-/// Utility class for message UI formatting
-class MessageUIUtils {
-  static String formatDateTime(String dateString) {
+  // Utility methods moved to the class to avoid static dependencies
+  Color _getPriorityColor(int priority) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    if (priority >= 8) return colorScheme.error;
+    if (priority >= 4) return const Color(0xFFF59E0B); // Warning color
+    return colorScheme.primary;
+  }
+
+  String _formatDateTime(String dateString) {
     try {
       final dateTime = DateTime.parse(dateString);
       return DateFormat('MMM d, y HH:mm').format(dateTime.toLocal());
     } catch (e) {
       return dateString;
     }
-  }
-
-  static Color getPriorityColor(int priority) {
-    if (priority >= 8) return Colors.red[700]!;
-    if (priority >= 4) return Colors.amber[700]!;
-    return Colors.blue[700]!;
   }
 }

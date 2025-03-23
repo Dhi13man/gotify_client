@@ -1,3 +1,5 @@
+// ignore_for_file: curly_braces_in_flow_control_structures
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:gotify_client/providers/message_provider.dart';
@@ -72,19 +74,24 @@ class SendMessageScreenState extends State<SendMessageScreen> {
   }
 
   void _showSuccessMessage() {
+    final colorScheme = Theme.of(context).colorScheme;
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Message sent successfully')),
+      SnackBar(
+        content: const Text('Message sent successfully'),
+        backgroundColor: colorScheme.primary,
+      ),
     );
   }
 
   void _showErrorMessage() {
+    final colorScheme = Theme.of(context).colorScheme;
     final errorMessage =
         Provider.of<MessageProvider>(context, listen: false).error ??
             'Failed to send message';
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(errorMessage),
-        backgroundColor: Colors.red,
+        backgroundColor: colorScheme.error,
       ),
     );
   }
@@ -95,8 +102,16 @@ class SendMessageScreenState extends State<SendMessageScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Send Message')),
+      backgroundColor: colorScheme.surface,
+      appBar: AppBar(
+        title: const Text(
+          'Send Message',
+          style: TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -106,13 +121,13 @@ class SendMessageScreenState extends State<SendMessageScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _buildTitleField(),
-                const SizedBox(height: 16),
-                _buildMessageField(),
-                const SizedBox(height: 16),
-                _buildPrioritySection(),
-                const SizedBox(height: 16),
-                _buildApplicationTokenField(),
                 const SizedBox(height: 24),
+                _buildMessageField(),
+                const SizedBox(height: 24),
+                _buildPrioritySection(),
+                const SizedBox(height: 24),
+                _buildApplicationTokenField(),
+                const SizedBox(height: 32),
                 _buildSubmitButton(),
               ],
             ),
@@ -123,12 +138,16 @@ class SendMessageScreenState extends State<SendMessageScreen> {
   }
 
   Widget _buildTitleField() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return TextFormField(
       controller: _titleController,
       decoration: InputDecoration(
         labelText: 'Title',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+        hintText: 'Enter message title',
+        prefixIcon: Icon(
+          Icons.title,
+          color: colorScheme.primary,
         ),
       ),
       validator: _validateTitle,
@@ -143,12 +162,20 @@ class SendMessageScreenState extends State<SendMessageScreen> {
   }
 
   Widget _buildMessageField() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return TextFormField(
       controller: _messageController,
       decoration: InputDecoration(
         labelText: 'Message',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+        hintText: 'Enter your message content',
+        alignLabelWithHint: true,
+        prefixIcon: Padding(
+          padding: const EdgeInsets.only(bottom: 80),
+          child: Icon(
+            Icons.message,
+            color: colorScheme.primary,
+          ),
         ),
       ),
       maxLines: 5,
@@ -164,44 +191,117 @@ class SendMessageScreenState extends State<SendMessageScreen> {
   }
 
   Widget _buildPrioritySection() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Priority: $_priority',
-          style: const TextStyle(fontSize: 16),
-        ),
-        Slider(
-          value: _priority.toDouble(),
-          min: PriorityLevels.min.toDouble(),
-          max: PriorityLevels.max.toDouble(),
-          divisions: PriorityLevels.max - PriorityLevels.min,
-          label: _priority.toString(),
-          onChanged: (double value) => _updatePriorityValue(value.toInt()),
-        ),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _priorityChip('Low', PriorityLevels.low),
-            _priorityChip('Normal', PriorityLevels.normal),
-            _priorityChip('High', PriorityLevels.high),
-            _priorityChip('Urgent', PriorityLevels.urgent),
-          ],
-        ),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            border: Border.all(
+              color: colorScheme.outline.withValues(alpha: 0.3),
+            ),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Priority',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: _getPriorityColor().withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      _getPriorityLabel(),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: _getPriorityColor(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              SliderTheme(
+                data: SliderTheme.of(context).copyWith(
+                  activeTrackColor: _getPriorityColor(),
+                  inactiveTrackColor:
+                      _getPriorityColor().withValues(alpha: 0.2),
+                  thumbColor: _getPriorityColor(),
+                  trackHeight: 6,
+                  thumbShape:
+                      const RoundSliderThumbShape(enabledThumbRadius: 8),
+                ),
+                child: Slider(
+                  value: _priority.toDouble(),
+                  min: PriorityLevels.min.toDouble(),
+                  max: PriorityLevels.max.toDouble(),
+                  divisions: PriorityLevels.max - PriorityLevels.min,
+                  label: _priority.toString(),
+                  onChanged: (double value) =>
+                      _updatePriorityValue(value.toInt()),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _priorityChip('Low', PriorityLevels.low),
+                  _priorityChip('Normal', PriorityLevels.normal),
+                  _priorityChip('High', PriorityLevels.high),
+                  _priorityChip('Urgent', PriorityLevels.urgent),
+                ],
+              ),
+            ],
+          ),
+        )
       ],
     );
   }
 
+  Color _getPriorityColor() {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    if (_priority >= 8) return colorScheme.error;
+    if (_priority >= 4) return const Color(0xFFF59E0B); // Warning color
+    return colorScheme.primary;
+  }
+
+  String _getPriorityLabel() {
+    if (_priority >= 8) return 'Urgent';
+    if (_priority >= 4) return 'High';
+    if (_priority >= 2) return 'Normal';
+    return 'Low';
+  }
+
   Widget _buildApplicationTokenField() {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return TextFormField(
       controller: _applicationTokenController,
       decoration: InputDecoration(
         labelText: 'Application Token',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
         hintText: 'Enter the application token',
+        prefixIcon: Icon(
+          Icons.vpn_key,
+          color: colorScheme.primary,
+        ),
       ),
       validator: _validateApplicationToken,
     );
@@ -218,29 +318,67 @@ class SendMessageScreenState extends State<SendMessageScreen> {
     return SizedBox(
       width: double.infinity,
       height: 50,
-      child: ElevatedButton(
+      child: ElevatedButton.icon(
         onPressed: _isSending ? null : _sendMessage,
-        style: ElevatedButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+        icon: _isSending
+            ? Container(
+                width: 20,
+                height: 20,
+                margin: const EdgeInsets.only(right: 12),
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: Theme.of(context).colorScheme.onPrimary,
+                ),
+              )
+            : const Icon(Icons.send),
+        label: Text(
+          'Send Message',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
           ),
         ),
-        child: _isSending
-            ? const CircularProgressIndicator()
-            : const Text('Send Message', style: TextStyle(fontSize: 16)),
       ),
     );
   }
 
   Widget _priorityChip(String label, int value) {
-    return FilterChip(
-      label: Text(label),
-      selected: _priority == value,
-      onSelected: (bool selected) {
-        if (selected) {
-          _updatePriorityValue(value);
-        }
-      },
+    final colorScheme = Theme.of(context).colorScheme;
+    final isSelected = _priority == value;
+
+    Color chipColor;
+    if (value >= 8) {
+      chipColor = colorScheme.error;
+    } else if (value >= 4) {
+      chipColor = const Color(0xFFF59E0B); // Warning color
+    } else {
+      chipColor = colorScheme.primary;
+    }
+
+    return GestureDetector(
+      onTap: () => _updatePriorityValue(value),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? chipColor.withValues(alpha: 0.15)
+              : colorScheme.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected
+                ? chipColor
+                : colorScheme.outline.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+            color: isSelected ? chipColor : colorScheme.onSurface,
+          ),
+        ),
+      ),
     );
   }
 }
