@@ -24,16 +24,14 @@ class AuthService {
   /// Loads authentication state from secure storage
   Future<AuthState> loadAuth() async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final authData = prefs.getString(_authKey);
-
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      final String? authData = prefs.getString(_authKey);
       if (authData == null) {
         return AuthState.initial();
       }
 
       final Map<String, dynamic> authMap = jsonDecode(authData);
       final token = await _secureStorage.read(key: _tokenKey);
-
       return AuthState(
         isAuthenticated: authMap['isAuthenticated'] == true && token != null,
         serverUrl: authMap['serverUrl'] ?? '',
@@ -85,12 +83,11 @@ class AuthService {
       );
       await _saveAuth(authState);
       return authState;
-    } on AuthServiceException catch (e) {
-      return _createErrorState(config.serverUrl, e.message);
     } catch (e) {
-      _logger.severe('Login failed', e);
-      return _createErrorState(config.serverUrl,
-          'Authentication failed: ${e.toString().split('\n').first}');
+      return _createErrorState(
+        config.serverUrl,
+        'Authentication failed: ${e.toString().split('\n').first}',
+      );
     }
   }
 
@@ -103,8 +100,7 @@ class AuthService {
         _secureStorage.delete(key: _tokenKey),
       ]);
     } catch (e) {
-      _logger.severe('Logout error', e);
-      throw AuthServiceException('Failed to logout: ${e.toString()}');
+      throw ClientAuthenticationException('Failed to logout: ${e.toString()}');
     }
   }
 
@@ -119,18 +115,16 @@ class AuthService {
 
       // Parse and validate URL
       final uri = Uri.parse(serverUrl);
-      if (!uri.hasScheme || !['http', 'https'].contains(uri.scheme)) {
-        throw AuthServiceException('Invalid URL scheme. Must be http or https');
-      }
-
       if (uri.host.isEmpty) {
-        throw AuthServiceException('Invalid host in URL');
+        throw ClientValidationException('Invalid host in URL');
+      }
+      if (!uri.hasScheme || !['http', 'https'].contains(uri.scheme)) {
+        throw ClientValidationException('Invalid URL scheme');
       }
       return serverUrl;
-    } on AuthServiceException {
-      rethrow;
-    } catch (e) {
-      throw AuthServiceException('Invalid server URL format: ${e.toString()}');
+    } catch (e, stackTrace) {
+      _logger.severe('Error normalizing server URL', e, stackTrace);
+      return url;
     }
   }
 
@@ -149,22 +143,26 @@ class AuthService {
         },
       ).timeout(_requestTimeout);
 
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        final token = responseData['token'];
-        if (token == null || token is! String || token.isEmpty) {
-          throw AuthServiceException('Server returned invalid token format');
-        }
-        return token;
-      } else {
-        throw AuthServiceException(
+      if (response.statusCode != 200) {
+        throw ClientAuthenticationException(
           'Failed to create client: HTTP ${response.statusCode} - ${_getErrorFromResponse(response)}',
         );
       }
-    } on AuthServiceException {
+
+      final responseData = jsonDecode(response.body);
+      final token = responseData['token'];
+      if (token == null || token is! String || token.isEmpty) {
+        throw ClientAuthenticationException(
+          'Server returned invalid token format',
+        );
+      }
+      return token;
+    } on ClientException {
       rethrow;
     } catch (e) {
-      throw AuthServiceException('Failed to get token: ${e.toString()}');
+      throw ClientAuthenticationException(
+        'Failed to get token: ${e.toString()}',
+      );
     }
   }
 
@@ -177,14 +175,16 @@ class AuthService {
       ).timeout(_requestTimeout);
 
       if (verifyResponse.statusCode != 200) {
-        throw AuthServiceException(
+        throw ClientAuthenticationException(
           'Invalid token: HTTP ${verifyResponse.statusCode} - ${_getErrorFromResponse(verifyResponse)}',
         );
       }
-    } on AuthServiceException {
+    } on ClientException {
       rethrow;
     } catch (e) {
-      throw AuthServiceException('Token verification failed: ${e.toString()}');
+      throw ClientAuthenticationException(
+        'Token verification failed: ${e.toString()}',
+      );
     }
   }
 
@@ -232,9 +232,6 @@ class AuthService {
       }
     } catch (e) {
       _logger.severe('Error saving auth data', e);
-      throw AuthServiceException(
-        'Failed to save authentication: ${e.toString()}',
-      );
     }
   }
 }

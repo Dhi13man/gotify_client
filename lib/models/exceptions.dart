@@ -14,6 +14,10 @@ class ClientException extends BaseException {
   const ClientException(super.message, {super.statusCode});
 }
 
+class ClientValidationException extends BaseException {
+  const ClientValidationException(super.message, {super.statusCode = 400});
+}
+
 class ClientTimeoutException extends ClientException {
   const ClientTimeoutException(super.message, {super.statusCode = 504});
 }

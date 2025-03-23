@@ -178,22 +178,18 @@ class MessageService {
         final List<dynamic> data = responseBody['messages'];
         return data.map((json) => Message.fromJson(json)).toList();
       } else if (response.statusCode == 401) {
-        _logger
-            .warning('Authentication failure (HTTP 401) when getting messages');
         _handleAuthenticationFailure();
-        throw AuthenticationException('Authentication failed', statusCode: 401);
+        throw ClientAuthenticationException('Authentication failed');
       } else {
-        _logger.warning('Failed to load messages: HTTP ${response.statusCode}');
         throw _createMessageException('Failed to load messages', response);
       }
     } on TimeoutException {
-      _logger.warning('Request timeout when getting messages');
-      throw MessageServiceException('Request timed out', statusCode: 504);
-    } on MessageServiceException {
+      throw ClientTimeoutException('Request timed out');
+    } on ClientException {
       rethrow;
     } catch (e, stackTrace) {
       _logger.severe('Error getting messages', e, stackTrace);
-      throw MessageServiceException(
+      throw ClientException(
         'Failed to retrieve messages: ${e.toString()}',
       );
     }
@@ -227,19 +223,18 @@ class MessageService {
         _logger
             .warning('Authentication failure (HTTP 401) when sending message');
         _handleAuthenticationFailure();
-        throw AuthenticationException('Authentication failed', statusCode: 401);
+        throw ClientAuthenticationException('Authentication failed');
       } else {
         _logger.warning('Failed to send message: HTTP ${response.statusCode}');
         throw _createMessageException('Failed to send message', response);
       }
     } on TimeoutException {
-      _logger.warning('Request timeout when sending message');
-      throw MessageServiceException('Request timed out', statusCode: 504);
-    } on MessageServiceException {
+      throw ClientTimeoutException('Request timed out');
+    } on ClientException {
       rethrow;
     } catch (e, stackTrace) {
       _logger.severe('Error sending message', e, stackTrace);
-      throw MessageServiceException('Failed to send message: ${e.toString()}');
+      throw ClientException('Failed to send message: ${e.toString()}');
     }
   }
 
@@ -259,21 +254,19 @@ class MessageService {
         _logger
             .warning('Authentication failure (HTTP 401) when deleting message');
         _handleAuthenticationFailure();
-        throw AuthenticationException('Authentication failed', statusCode: 401);
+        throw ClientAuthenticationException('Authentication failed');
       } else {
         _logger
             .warning('Failed to delete message: HTTP ${response.statusCode}');
         throw _createMessageException('Failed to delete message', response);
       }
     } on TimeoutException {
-      _logger.warning('Request timeout when deleting message');
-      throw MessageServiceException('Request timed out', statusCode: 504);
-    } on MessageServiceException {
+      throw ClientTimeoutException('Request timed out');
+    } on ClientException {
       rethrow;
     } catch (e, stackTrace) {
       _logger.severe('Error deleting message', e, stackTrace);
-      throw MessageServiceException(
-          'Failed to delete message: ${e.toString()}');
+      throw ClientException('Failed to delete message: ${e.toString()}');
     }
   }
 
@@ -284,7 +277,7 @@ class MessageService {
   }
 
   /// Create exception with details from HTTP response
-  MessageServiceException _createMessageException(
+  ClientException _createMessageException(
     String message,
     http.Response response,
   ) {
@@ -296,7 +289,7 @@ class MessageService {
       // Use the default error message if JSON parsing fails
     }
 
-    return MessageServiceException(
+    return ClientException(
       '$message: $errorDetails',
       statusCode: response.statusCode,
     );
@@ -304,7 +297,7 @@ class MessageService {
 
   void _validateAuthentication() {
     if (!_authState.isAuthenticated || _authState.token == null) {
-      throw AuthenticationException('Not authenticated');
+      throw ClientAuthenticationException('Not authenticated');
     }
   }
 }
