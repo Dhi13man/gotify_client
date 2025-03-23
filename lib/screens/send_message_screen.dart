@@ -13,7 +13,7 @@ class PriorityLevels {
 }
 
 class SendMessageScreen extends StatefulWidget {
-  const SendMessageScreen({Key? key}) : super(key: key);
+  const SendMessageScreen({super.key});
 
   @override
   SendMessageScreenState createState() => SendMessageScreenState();

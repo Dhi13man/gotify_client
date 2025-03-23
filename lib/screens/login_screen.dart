@@ -4,7 +4,7 @@ import 'package:gotify_client/providers/auth_provider.dart';
 import 'package:gotify_client/models/auth_models.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+  const LoginScreen({super.key});
 
   @override
   LoginScreenState createState() => LoginScreenState();

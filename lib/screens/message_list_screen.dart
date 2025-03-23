@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'send_message_screen.dart';
 
 class MessageListScreen extends StatefulWidget {
-  const MessageListScreen({Key? key}) : super(key: key);
+  const MessageListScreen({super.key});
 
   @override
   MessageListScreenState createState() => MessageListScreenState();

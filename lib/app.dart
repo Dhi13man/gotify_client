@@ -6,7 +6,7 @@ import 'package:gotify_client/screens/message_list_screen.dart';
 import 'package:provider/provider.dart';
 
 class GotifyClientApp extends StatelessWidget {
-  const GotifyClientApp({Key? key}) : super(key: key);
+  const GotifyClientApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +33,7 @@ class GotifyClientApp extends StatelessWidget {
 }
 
 class HomeWrapper extends StatefulWidget {
-  const HomeWrapper({Key? key}) : super(key: key);
+  const HomeWrapper({super.key});
 
   @override
   HomeWrapperState createState() => HomeWrapperState();

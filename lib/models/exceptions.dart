@@ -10,20 +10,20 @@ abstract class ServiceException implements Exception {
 
 /// Authentication service specific exceptions
 class AuthServiceException extends ServiceException {
-  AuthServiceException(String message) : super(message);
+  AuthServiceException(super.message);
 }
 
 /// Message service specific exceptions
 class MessageServiceException extends ServiceException {
-  MessageServiceException(String message) : super(message);
+  MessageServiceException(super.message);
 }
 
 /// Network-related exceptions
 class NetworkException extends ServiceException {
-  NetworkException(String message) : super(message);
+  NetworkException(super.message);
 }
 
 /// Validation exceptions
 class ValidationException extends ServiceException {
-  ValidationException(String message) : super(message);
+  ValidationException(super.message);
 }
