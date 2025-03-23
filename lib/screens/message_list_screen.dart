@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gotify_client/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:gotify_client/providers/message_provider.dart';
 import 'package:gotify_client/models/message_model.dart';
@@ -29,10 +30,8 @@ class MessageListScreenState extends State<MessageListScreen> {
       appBar: AppBar(
         title: const Text('Gotify Messages'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _loadMessages,
-          ),
+          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadMessages),
+          IconButton(icon: const Icon(Icons.logout), onPressed: _logout)
         ],
       ),
       body: Consumer<MessageProvider>(
@@ -213,6 +212,13 @@ class MessageListScreenState extends State<MessageListScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (context) => const SendMessageScreen()),
     );
+  }
+
+  void _logout() {
+    // Implement logout functionality
+    // This could involve clearing authentication tokens, navigating to a login screen, etc.
+    Provider.of<AuthProvider>(context, listen: false).logout();
+    Navigator.of(context).pushReplacementNamed('/login');
   }
 }
 
