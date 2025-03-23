@@ -67,28 +67,21 @@ class LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  _buildLogoHeader(),
-                  const SizedBox(height: 32),
-                  _buildLoginForm(),
-                  const SizedBox(height: 16),
-                  _buildHelperLinks(),
-                  const SizedBox(height: 24),
-                  _buildVersionInfo(),
-                ],
-              ),
-            ),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            children: [
+              _buildLogoHeader(),
+              const SizedBox(height: 32),
+              _buildLoginForm(),
+              const SizedBox(height: 16),
+              _buildHelperLinks(),
+              const SizedBox(height: 24),
+              _buildVersionInfo(),
+            ],
           ),
         ),
       ),

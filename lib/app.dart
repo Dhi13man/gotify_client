@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:gotify_client/components/bottom_nav_bar.dart';
+import 'package:gotify_client/components/scaffold.dart';
 import 'package:gotify_client/providers/auth_provider.dart';
 import 'package:gotify_client/providers/message_provider.dart';
 import 'package:gotify_client/screens/login_screen.dart';
 import 'package:gotify_client/screens/message_list_screen.dart';
+import 'package:gotify_client/screens/send_message_screen.dart';
 import 'package:gotify_client/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
@@ -20,8 +23,8 @@ class GotifyClientApp extends StatelessWidget {
         title: 'Gotify Client',
         theme: AppTheme.getLightTheme(context),
         darkTheme: AppTheme.getDarkTheme(context),
-        themeMode: ThemeMode.system, // Use system theme by default
-        home: const HomeWrapper(),
+        themeMode: ThemeMode.system,
+        home: HomeWrapper(),
       ),
     );
   }
@@ -35,6 +38,20 @@ class HomeWrapper extends StatefulWidget {
 }
 
 class HomeWrapperState extends State<HomeWrapper> {
+  static const List<Widget> screens = [
+    MessageListScreen(),
+    SendMessageScreen(),
+    MessageListScreen(),
+  ];
+
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = 0;
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
@@ -45,7 +62,7 @@ class HomeWrapperState extends State<HomeWrapper> {
     }
 
     if (!authProvider.isAuthenticated) {
-      return const LoginScreen();
+      return const Scaffold(body: LoginScreen());
     }
 
     // Initialize the message provider with auth data
@@ -54,6 +71,16 @@ class HomeWrapperState extends State<HomeWrapper> {
           .initialize(authProvider.authState);
     });
 
-    return const MessageListScreen();
+    return AppScaffold(
+      body: screens[_currentIndex],
+      bottomNavBar: AppBottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: _onBottomNavTapped,
+      ),
+    );
+  }
+
+  void _onBottomNavTapped(int index) {
+    setState(() => _currentIndex = index);
   }
 }

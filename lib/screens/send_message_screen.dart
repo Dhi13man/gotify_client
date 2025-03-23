@@ -102,35 +102,24 @@ class SendMessageScreenState extends State<SendMessageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        title: const Text(
-          'Send Message',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildTitleField(),
-                const SizedBox(height: 24),
-                _buildMessageField(),
-                const SizedBox(height: 24),
-                _buildPrioritySection(),
-                const SizedBox(height: 24),
-                _buildApplicationTokenField(),
-                const SizedBox(height: 32),
-                _buildSubmitButton(),
-              ],
-            ),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildTitleField(),
+              const SizedBox(height: 24),
+              _buildMessageField(),
+              const SizedBox(height: 24),
+              _buildPrioritySection(),
+              const SizedBox(height: 24),
+              _buildApplicationTokenField(),
+              const SizedBox(height: 32),
+              _buildSubmitButton(),
+            ],
           ),
         ),
       ),

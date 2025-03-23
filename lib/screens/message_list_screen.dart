@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:gotify_client/providers/auth_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:gotify_client/providers/message_provider.dart';
 import 'package:gotify_client/models/message_model.dart';
 import 'package:intl/intl.dart';
-import 'send_message_screen.dart';
 
 class MessageListScreen extends StatefulWidget {
   const MessageListScreen({super.key});
@@ -78,49 +76,22 @@ class MessageListScreenState extends State<MessageListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    return Consumer<MessageProvider>(
+      builder: (context, messageProvider, _) {
+        if (messageProvider.isLoading && messageProvider.messages.isEmpty) {
+          return _buildLoadingView();
+        }
 
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      appBar: AppBar(
-        title: const Text(
-          'Gotify Messages',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-        actions: [
-          IconButton(icon: const Icon(Icons.refresh), onPressed: _loadMessages),
-          IconButton(icon: const Icon(Icons.logout), onPressed: _logout)
-        ],
-      ),
-      body: Consumer<MessageProvider>(
-        builder: (context, messageProvider, _) {
-          if (messageProvider.isLoading && messageProvider.messages.isEmpty) {
-            return _buildLoadingView();
-          }
+        if (messageProvider.error != null && messageProvider.messages.isEmpty) {
+          return _buildErrorView(messageProvider);
+        }
 
-          if (messageProvider.error != null &&
-              messageProvider.messages.isEmpty) {
-            return _buildErrorView(messageProvider);
-          }
+        if (messageProvider.messages.isEmpty) {
+          return _buildEmptyView();
+        }
 
-          if (messageProvider.messages.isEmpty) {
-            return _buildEmptyView();
-          }
-
-          return _buildMessageList(messageProvider);
-        },
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToSendMessage,
-        tooltip: 'Send Message',
-        backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
-        elevation: 4,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: const Icon(Icons.send),
-      ),
+        return _buildMessageList(messageProvider);
+      },
     );
   }
 
@@ -350,17 +321,6 @@ class MessageListScreenState extends State<MessageListScreen> {
         ],
       ),
     );
-  }
-
-  void _navigateToSendMessage() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const SendMessageScreen()),
-    );
-  }
-
-  void _logout() {
-    Provider.of<AuthProvider>(context, listen: false).logout();
-    Navigator.of(context).pushReplacementNamed('/login');
   }
 
   // Utility methods moved to the class to avoid static dependencies
