@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:gotify_client/models/exceptions.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -6,11 +7,21 @@ import 'package:logging/logging.dart';
 import 'package:gotify_client/models/auth_models.dart';
 
 class AuthService {
-  final FlutterSecureStorage _secureStorage = const FlutterSecureStorage();
-  final String _authKey = 'gotify_auth';
-  final String _tokenKey = 'gotify_token';
-  final Logger _logger = Logger('AuthService');
+  // Constants
+  static const String _authKey = 'gotify_auth';
+  static const String _tokenKey = 'gotify_token';
+  static const String _clientEndpoint = '/client';
+  static const String _applicationEndpoint = '/application';
+  static const Duration _requestTimeout = Duration(seconds: 10);
 
+  static final _logger = Logger('AuthService');
+
+  final FlutterSecureStorage _secureStorage;
+
+  AuthService({FlutterSecureStorage? secureStorage})
+      : _secureStorage = secureStorage ?? const FlutterSecureStorage();
+
+  /// Loads authentication state from secure storage
   Future<AuthState> loadAuth() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -20,10 +31,11 @@ class AuthService {
         return AuthState.initial();
       }
 
-      final authMap = jsonDecode(authData);
+      final Map<String, dynamic> authMap = jsonDecode(authData);
       final token = await _secureStorage.read(key: _tokenKey);
+
       return AuthState(
-        isAuthenticated: authMap['isAuthenticated'] && token != null,
+        isAuthenticated: authMap['isAuthenticated'] == true && token != null,
         serverUrl: authMap['serverUrl'] ?? '',
         clientToken: token,
         error: null,
@@ -34,57 +46,35 @@ class AuthService {
     }
   }
 
+  /// Attempts to login with the provided configuration
   Future<AuthState> login(AuthConfig config) async {
+    // Normalize and validate server URL
+    final String serverUrl = _normalizeServerUrl(config.serverUrl);
+    if (serverUrl.isEmpty) {
+      return _createErrorState(serverUrl, 'Server URL cannot be empty');
+    }
+
     try {
-      // Validate and normalize server URL
-      var serverUrl = config.serverUrl.trim();
-      // Remove trailing slashes
-      while (serverUrl.endsWith('/')) {
-        serverUrl = serverUrl.substring(0, serverUrl.length - 1);
-      }
-
-      // Check for invalid port configuration
-      final uri = Uri.parse(serverUrl);
-      if (uri.port == 0) {
-        throw Exception('Invalid port configuration in server URL');
-      }
-
       String? token = config.clientToken;
 
       // If username/password is provided, get token via client creation
       if (token == null && config.username != null && config.password != null) {
-        final response = await http.post(
-          Uri.parse('$serverUrl/client'),
-          body: jsonEncode({'name': 'Flutter Client'}),
-          encoding: Encoding.getByName('utf-8'),
-          headers: {
-            'Authorization':
-                'Basic ${base64Encode(utf8.encode('${config.username}:${config.password}'))}',
-            'Content-Type': 'application/json',
-          },
+        token = await _getTokenFromCredentials(
+          serverUrl,
+          config.username!,
+          config.password!,
         );
-
-        if (response.statusCode == 200) {
-          final responseData = jsonDecode(response.body);
-          token = responseData['token'];
-        } else {
-          throw Exception('Failed to create client: ${response.statusCode}');
-        }
       }
 
-      if (token == null) {
-        throw Exception('No authentication method provided');
+      if (token == null || token.isEmpty) {
+        return _createErrorState(
+          serverUrl,
+          'No valid authentication method provided',
+        );
       }
 
       // Verify token works by making a test request
-      final verifyResponse = await http.get(
-        Uri.parse('$serverUrl/application'),
-        headers: {'X-Gotify-Key': token},
-      );
-
-      if (verifyResponse.statusCode != 200) {
-        throw Exception('Invalid token');
-      }
+      await _verifyToken(serverUrl, token);
 
       // Store auth data
       final authState = AuthState(
@@ -95,27 +85,131 @@ class AuthService {
       );
       await _saveAuth(authState);
       return authState;
+    } on AuthServiceException catch (e) {
+      return _createErrorState(config.serverUrl, e.message);
     } catch (e) {
       _logger.severe('Login failed', e);
-      return AuthState(
-        isAuthenticated: false,
-        serverUrl: config.serverUrl,
-        clientToken: null,
-        error: 'Authentication failed: $e',
-      );
+      return _createErrorState(config.serverUrl,
+          'Authentication failed: ${e.toString().split('\n').first}');
     }
   }
 
+  /// Logs the user out by clearing stored credentials
   Future<void> logout() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_authKey);
-      await _secureStorage.delete(key: _tokenKey);
+      await Future.wait([
+        prefs.remove(_authKey),
+        _secureStorage.delete(key: _tokenKey),
+      ]);
     } catch (e) {
       _logger.severe('Logout error', e);
+      throw AuthServiceException('Failed to logout: ${e.toString()}');
     }
   }
 
+  /// Normalizes server URL by removing trailing slashes and validating format
+  String _normalizeServerUrl(String url) {
+    try {
+      var serverUrl = url.trim();
+      // Remove trailing slashes
+      while (serverUrl.endsWith('/')) {
+        serverUrl = serverUrl.substring(0, serverUrl.length - 1);
+      }
+
+      // Parse and validate URL
+      final uri = Uri.parse(serverUrl);
+      if (!uri.hasScheme || !['http', 'https'].contains(uri.scheme)) {
+        throw AuthServiceException('Invalid URL scheme. Must be http or https');
+      }
+
+      if (uri.host.isEmpty) {
+        throw AuthServiceException('Invalid host in URL');
+      }
+      return serverUrl;
+    } on AuthServiceException {
+      rethrow;
+    } catch (e) {
+      throw AuthServiceException('Invalid server URL format: ${e.toString()}');
+    }
+  }
+
+  /// Gets a client token using username and password authentication
+  Future<String> _getTokenFromCredentials(
+      String serverUrl, String username, String password) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$serverUrl$_clientEndpoint'),
+        body: jsonEncode({'name': 'Flutter Client'}),
+        encoding: Encoding.getByName('utf-8'),
+        headers: {
+          'Authorization':
+              'Basic ${base64Encode(utf8.encode('$username:$password'))}',
+          'Content-Type': 'application/json',
+        },
+      ).timeout(_requestTimeout);
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        final token = responseData['token'];
+        if (token == null || token is! String || token.isEmpty) {
+          throw AuthServiceException('Server returned invalid token format');
+        }
+        return token;
+      } else {
+        throw AuthServiceException(
+          'Failed to create client: HTTP ${response.statusCode} - ${_getErrorFromResponse(response)}',
+        );
+      }
+    } on AuthServiceException {
+      rethrow;
+    } catch (e) {
+      throw AuthServiceException('Failed to get token: ${e.toString()}');
+    }
+  }
+
+  /// Verifies that a token is valid by making a test request
+  Future<void> _verifyToken(String serverUrl, String token) async {
+    try {
+      final verifyResponse = await http.get(
+        Uri.parse('$serverUrl$_applicationEndpoint'),
+        headers: {'X-Gotify-Key': token},
+      ).timeout(_requestTimeout);
+
+      if (verifyResponse.statusCode != 200) {
+        throw AuthServiceException(
+          'Invalid token: HTTP ${verifyResponse.statusCode} - ${_getErrorFromResponse(verifyResponse)}',
+        );
+      }
+    } on AuthServiceException {
+      rethrow;
+    } catch (e) {
+      throw AuthServiceException('Token verification failed: ${e.toString()}');
+    }
+  }
+
+  /// Extracts error message from HTTP response
+  String _getErrorFromResponse(http.Response response) {
+    try {
+      final body = jsonDecode(response.body);
+      return body['error'] ?? body['message'] ?? 'Unknown error';
+    } catch (e) {
+      _logger.severe('Error parsing response', e);
+      return response.reasonPhrase ?? e.toString();
+    }
+  }
+
+  /// Helper method to create error auth states
+  AuthState _createErrorState(String serverUrl, String errorMessage) {
+    return AuthState(
+      isAuthenticated: false,
+      serverUrl: serverUrl,
+      clientToken: null,
+      error: errorMessage,
+    );
+  }
+
+  /// Saves authentication state securely
   Future<void> _saveAuth(AuthState authState) async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -123,24 +217,24 @@ class AuthService {
       // Store non-sensitive data in SharedPreferences
       await prefs.setString(
         _authKey,
-        jsonEncode(
-          {
-            'isAuthenticated': authState.isAuthenticated,
-            'serverUrl': authState.serverUrl,
-          },
-        ),
+        jsonEncode({
+          'isAuthenticated': authState.isAuthenticated,
+          'serverUrl': authState.serverUrl,
+        }),
       );
 
-      // Store token securely
-      if (authState.clientToken == null) {
-        return;
+      // Store token securely if present
+      if (authState.clientToken != null && authState.clientToken!.isNotEmpty) {
+        await _secureStorage.write(
+          key: _tokenKey,
+          value: authState.clientToken!,
+        );
       }
-      await _secureStorage.write(
-        key: _tokenKey,
-        value: authState.clientToken!,
-      );
     } catch (e) {
       _logger.severe('Error saving auth data', e);
+      throw AuthServiceException(
+        'Failed to save authentication: ${e.toString()}',
+      );
     }
   }
 }
