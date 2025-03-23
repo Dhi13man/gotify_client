@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gotify_client/models/auth_models.dart';
 import 'package:gotify_client/services/auth_service.dart';
-import 'package:logging/logging.dart';
 
 class AuthProvider extends ChangeNotifier {
   static const String initializationErrorPrefix = 'Failed to initialize: ';
@@ -9,8 +8,6 @@ class AuthProvider extends ChangeNotifier {
   static const String logoutErrorPrefix = 'Error during logout: ';
   static const String invalidConfigError =
       'Invalid configuration: Either client token or username/password must be provided';
-
-  static final _logger = Logger('AuthProvider');
 
   final AuthService _authService;
   AuthState _authState = AuthState.initial();
