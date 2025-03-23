@@ -32,30 +32,8 @@ class MessageListScreenState extends State<MessageListScreen> {
     final messageProvider =
         Provider.of<MessageProvider>(context, listen: false);
 
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Delete Message'),
-        content: Text(
-          'Are you sure you want to delete this message: "${message.title}"?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(false),
-            child: Text('CANCEL', style: TextStyle(color: colorScheme.primary)),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(true),
-            child: Text('DELETE', style: TextStyle(color: colorScheme.error)),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed != true || !mounted) {
-      return;
-    }
-
+    // First, optimistically remove the message from the local state
+    messageProvider.removeMessageLocally(message.id);
     final result = await messageProvider.deleteMessage(message.id);
 
     if (!mounted) return;
@@ -68,6 +46,8 @@ class MessageListScreenState extends State<MessageListScreen> {
         ),
       );
     } else {
+      // Restore the message if deletion failed
+      messageProvider.restoreMessage(message);
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: const Text('Failed to delete message'),

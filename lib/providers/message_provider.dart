@@ -219,4 +219,27 @@ class MessageProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// Optimistically removes a message from the local state
+  void removeMessageLocally(int messageId) {
+    _messages = _messages.where((message) => message.id != messageId).toList();
+    notifyListeners();
+  }
+
+  /// Restores a message if the API call fails
+  void restoreMessage(Message message) {
+    // Insert the message back at its appropriate position
+    final List<Message> updatedMessages = List.from(_messages);
+    // Find the right position to insert based on date
+    int insertIndex = 0;
+    while (insertIndex < updatedMessages.length &&
+        DateTime.parse(updatedMessages[insertIndex].date)
+            .isAfter(DateTime.parse(message.date))) {
+      insertIndex++;
+    }
+
+    updatedMessages.insert(insertIndex, message);
+    _messages = updatedMessages;
+    notifyListeners();
+  }
 }
