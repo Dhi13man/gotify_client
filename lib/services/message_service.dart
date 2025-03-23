@@ -204,7 +204,7 @@ class MessageService {
     required String title,
     required String message,
     required int priority,
-    required int applicationId,
+    required String applicationToken,
   }) async {
     _validateAuthentication();
 
@@ -212,7 +212,7 @@ class MessageService {
       final response = await http
           .post(
             Uri.parse('${_authState.serverUrl}$messageEndpoint'),
-            headers: {'X-Gotify-Key': _authState.token!, ...jsonContentType},
+            headers: {'X-Gotify-Key': applicationToken, ...jsonContentType},
             body: jsonEncode({
               'title': title,
               'message': message,
@@ -240,6 +240,40 @@ class MessageService {
     } catch (e, stackTrace) {
       _logger.severe('Error sending message', e, stackTrace);
       throw MessageServiceException('Failed to send message: ${e.toString()}');
+    }
+  }
+
+  /// Delete a message from the server
+  Future<bool> deleteMessage(int messageId) async {
+    _validateAuthentication();
+
+    try {
+      final response = await http
+          .delete(
+            Uri.parse('${_authState.serverUrl}$messageEndpoint/$messageId'),
+            headers: {'X-Gotify-Key': _authState.token!},
+          )
+          .timeout(httpTimeout);
+
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        return true;
+      } else if (response.statusCode == 401) {
+        _logger.warning(
+            'Authentication failure (HTTP 401) when deleting message');
+        _handleAuthenticationFailure();
+        throw AuthenticationException('Authentication failed', statusCode: 401);
+      } else {
+        _logger.warning('Failed to delete message: HTTP ${response.statusCode}');
+        throw _createMessageException('Failed to delete message', response);
+      }
+    } on TimeoutException {
+      _logger.warning('Request timeout when deleting message');
+      throw MessageServiceException('Request timed out', statusCode: 504);
+    } on MessageServiceException {
+      rethrow;
+    } catch (e, stackTrace) {
+      _logger.severe('Error deleting message', e, stackTrace);
+      throw MessageServiceException('Failed to delete message: ${e.toString()}');
     }
   }
 

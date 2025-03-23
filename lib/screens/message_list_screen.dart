@@ -24,6 +24,42 @@ class MessageListScreenState extends State<MessageListScreen> {
     await Provider.of<MessageProvider>(context, listen: false).loadMessages();
   }
 
+  Future<void> _deleteMessage(BuildContext context, Message message) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Message'),
+        content: Text('Are you sure you want to delete this message: "${message.title}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('CANCEL'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('DELETE', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+      final result = await Provider.of<MessageProvider>(context, listen: false)
+          .deleteMessage(message.id);
+      
+      if (result) {
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(content: Text('Message deleted successfully')),
+        );
+      } else {
+        scaffoldMessenger.showSnackBar(
+          const SnackBar(content: Text('Failed to delete message'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -106,8 +142,40 @@ class MessageListScreenState extends State<MessageListScreen> {
       child: ListView.builder(
         padding: const EdgeInsets.all(8),
         itemCount: provider.messages.length,
-        itemBuilder: (context, index) =>
-            _buildMessageCard(provider.messages[index]),
+        itemBuilder: (context, index) {
+          final message = provider.messages[index];
+          return Dismissible(
+            key: Key('message-${message.id}'),
+            direction: DismissDirection.endToStart,
+            confirmDismiss: (_) async {
+              return await showDialog<bool>(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Delete Message'),
+                  content: Text('Are you sure you want to delete this message?'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: const Text('CANCEL'),
+                    ),
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(true),
+                      child: const Text('DELETE', style: TextStyle(color: Colors.red)),
+                    ),
+                  ],
+                ),
+              );
+            },
+            onDismissed: (_) => _deleteMessage(context, message),
+            background: Container(
+              alignment: Alignment.centerRight,
+              padding: const EdgeInsets.only(right: 20),
+              color: Colors.red,
+              child: const Icon(Icons.delete, color: Colors.white),
+            ),
+            child: _buildMessageCard(message),
+          );
+        },
       ),
     );
   }
@@ -120,7 +188,7 @@ class MessageListScreenState extends State<MessageListScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: priorityColor.withValues(alpha: 0.5),
+          color: priorityColor.withAlpha(128),
           width: 1,
         ),
       ),
@@ -140,7 +208,7 @@ class MessageListScreenState extends State<MessageListScreen> {
 
   Widget _buildMessageHeader(Message message, Color priorityColor) {
     return Container(
-      color: priorityColor.withValues(alpha: 0.8),
+      color: priorityColor.withAlpha(204), // Alpha 0.8 converted to int
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Row(
         children: [
@@ -157,7 +225,7 @@ class MessageListScreenState extends State<MessageListScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
+              color: Colors.white.withAlpha(51), // Alpha 0.2 converted to int
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
@@ -168,6 +236,13 @@ class MessageListScreenState extends State<MessageListScreen> {
               ),
             ),
           ),
+          IconButton(
+            icon: const Icon(Icons.delete, color: Colors.white, size: 20),
+            onPressed: () => _deleteMessage(context, message),
+            tooltip: 'Delete message',
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+          ),
         ],
       ),
     );
@@ -176,7 +251,7 @@ class MessageListScreenState extends State<MessageListScreen> {
   Widget _buildMessageContent(Message message) {
     return Padding(
       padding: const EdgeInsets.all(16),
-      child: Text(
+      child: SelectableText(
         message.message,
         style: const TextStyle(fontSize: 15),
       ),

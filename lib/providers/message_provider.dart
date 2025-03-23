@@ -104,7 +104,7 @@ class MessageProvider extends ChangeNotifier {
     required String title,
     required String message,
     required int priority,
-    required int applicationId,
+    required String applicationToken,
   }) async {
     // Validate service initialization
     if (!_checkServiceInitialized()) return false;
@@ -125,7 +125,7 @@ class MessageProvider extends ChangeNotifier {
         title: title,
         message: message,
         priority: priority,
-        applicationId: applicationId,
+        applicationToken: applicationToken,
       );
 
       if (success) {
@@ -137,6 +137,32 @@ class MessageProvider extends ChangeNotifier {
     } catch (e, stack) {
       _logger.warning('Error sending message', e, stack);
       _setError('Error sending message: $e');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  /// Deletes a message by ID
+  Future<bool> deleteMessage(int messageId) async {
+    if (!_checkServiceInitialized()) return false;
+
+    _setLoading(true);
+
+    try {
+      final success = await _messageService!.deleteMessage(messageId);
+      
+      if (success) {
+        // Remove the message from local state
+        _messages = _messages.where((m) => m.id != messageId).toList();
+        _clearError();
+      } else {
+        _setError('Failed to delete message');
+      }
+      return success;
+    } catch (e, stack) {
+      _logger.warning('Error deleting message', e, stack);
+      _setError('Error deleting message: $e');
       return false;
     } finally {
       _setLoading(false);

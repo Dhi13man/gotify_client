@@ -20,20 +20,21 @@ class SendMessageScreen extends StatefulWidget {
 }
 
 class SendMessageScreenState extends State<SendMessageScreen> {
-  static const int defaultApplicationId = 1;
   static const int defaultPriority = PriorityLevels.normal;
+  static const String defaultApplicationToken = '';
 
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _messageController = TextEditingController();
+  final _applicationTokenController = TextEditingController();
   int _priority = defaultPriority;
-  int _applicationId = defaultApplicationId;
   bool _isSending = false;
 
   @override
   void dispose() {
     _titleController.dispose();
     _messageController.dispose();
+    _applicationTokenController.dispose();
     super.dispose();
   }
 
@@ -66,7 +67,7 @@ class SendMessageScreenState extends State<SendMessageScreen> {
       title: _titleController.text,
       message: _messageController.text,
       priority: _priority,
-      applicationId: _applicationId,
+      applicationToken: _applicationTokenController.text.trim(),
     );
   }
 
@@ -92,13 +93,6 @@ class SendMessageScreenState extends State<SendMessageScreen> {
     setState(() => _priority = value);
   }
 
-  void _updateApplicationId(String value) {
-    final parsedValue = int.tryParse(value);
-    if (parsedValue != null) {
-      setState(() => _applicationId = parsedValue);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,7 +111,7 @@ class SendMessageScreenState extends State<SendMessageScreen> {
                 const SizedBox(height: 16),
                 _buildPrioritySection(),
                 const SizedBox(height: 16),
-                _buildApplicationIdField(),
+                _buildApplicationTokenField(),
                 const SizedBox(height: 24),
                 _buildSubmitButton(),
               ],
@@ -199,27 +193,23 @@ class SendMessageScreenState extends State<SendMessageScreen> {
     );
   }
 
-  Widget _buildApplicationIdField() {
+  Widget _buildApplicationTokenField() {
     return TextFormField(
+      controller: _applicationTokenController,
       decoration: InputDecoration(
-        labelText: 'Application ID',
+        labelText: 'Application Token',
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
         ),
+        hintText: 'Enter the application token',
       ),
-      keyboardType: TextInputType.number,
-      initialValue: _applicationId.toString(),
-      onChanged: _updateApplicationId,
-      validator: _validateApplicationId,
+      validator: _validateApplicationToken,
     );
   }
 
-  String? _validateApplicationId(String? value) {
+  String? _validateApplicationToken(String? value) {
     if (value == null || value.isEmpty) {
-      return 'Please enter an application ID';
-    }
-    if (int.tryParse(value) == null) {
-      return 'Application ID must be a number';
+      return 'Please enter an application token';
     }
     return null;
   }
