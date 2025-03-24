@@ -17,7 +17,7 @@ void main() async {
   });
 
   // Initialize notifications
-  final notificationService = NotificationService();
+  final NotificationService notificationService = LocalNotificationService();
   notificationService.initialize();
   runApp(const GotifyClientApp());
 }

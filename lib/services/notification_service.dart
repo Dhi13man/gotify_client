@@ -1,27 +1,44 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:logging/logging.dart';
 
-/// Service responsible for managing local notifications across the application.
-class NotificationService {
-  static const String _defaultIconPath = '@mipmap/ic_launcher';
-  static final NotificationService _instance = NotificationService._internal();
-
-  factory NotificationService() => _instance;
-
-  final Logger _logger = Logger('NotificationService');
-  final FlutterLocalNotificationsPlugin _notificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-  bool _isInitialized = false;
-
-  /// Private constructor for singleton pattern
-  NotificationService._internal();
-
+/// Interface for notification services
+abstract class NotificationService {
   /// Returns whether the service has been initialized
-  bool get isInitialized => _isInitialized;
-
+  bool get isInitialized;
+  
   /// Initialize notification settings for all supported platforms
   ///
   /// Returns true if initialization was successful, false otherwise
+  Future<bool> initialize();
+  
+  /// Show a notification with the given title and body
+  Future<bool> showNotification({
+    required int id,
+    required String title,
+    required String body,
+    String? payload,
+  });
+}
+
+/// Default implementation of NotificationService using FlutterLocalNotifications
+class LocalNotificationService implements NotificationService {
+  static const String _defaultIconPath = '@mipmap/ic_launcher';
+  
+  final Logger _logger;
+  final FlutterLocalNotificationsPlugin _notificationsPlugin;
+  bool _isInitialized = false;
+
+  /// Constructor with explicit dependency injection
+  LocalNotificationService({
+    FlutterLocalNotificationsPlugin? notificationsPlugin,
+    Logger? logger,
+  }) : _notificationsPlugin = notificationsPlugin ?? FlutterLocalNotificationsPlugin(),
+       _logger = logger ?? Logger('LocalNotificationService');
+
+  @override
+  bool get isInitialized => _isInitialized;
+
+  @override
   Future<bool> initialize() async {
     if (_isInitialized) {
       _logger.info('Notification service already initialized');
@@ -67,7 +84,7 @@ class NotificationService {
     }
   }
 
-  /// Show a notification with the given title and body
+  @override
   Future<bool> showNotification({
     required int id,
     required String title,
