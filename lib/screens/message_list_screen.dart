@@ -288,7 +288,7 @@ class MessageListScreenState extends State<MessageListScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
+            SelectableText(
               message.message,
               style: TextStyle(
                 fontSize: 14,
