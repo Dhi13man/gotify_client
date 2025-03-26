@@ -149,13 +149,13 @@ class MessageListScreenState extends State<MessageListScreen> {
                 );
               }
 
-              if (messageProvider.messages.isEmpty) {
-                return const EmptyMessagesView();
-              }
-
               final filteredMessages =
                   filterMessages(messageProvider.messages, _selectedFilter);
               final groupedMessages = _groupMessagesByDate(filteredMessages);
+
+              if (groupedMessages.isEmpty) {
+                return const EmptyMessagesView();
+              }
 
               return MessageListView(
                 groupedMessages: groupedMessages,

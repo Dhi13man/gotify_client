@@ -8,15 +8,18 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MockFlutterSecureStorage extends Mock implements FlutterSecureStorage {}
+
 class MockClient extends Mock implements http.Client {}
+
 class MockResponse extends Mock implements http.Response {}
+
 class MockSharedPreferences extends Mock implements SharedPreferences {}
 
 void main() {
   late AuthService authService;
   late MockFlutterSecureStorage mockSecureStorage;
   late MockClient mockClient;
-  
+
   const String serverUrl = 'https://gotify.example.com';
   const String validToken = 'valid_token';
   const String username = 'testuser';
@@ -31,9 +34,9 @@ void main() {
   setUp(() {
     mockSecureStorage = MockFlutterSecureStorage();
     mockClient = MockClient();
-    
+
     authService = AuthService(secureStorage: mockSecureStorage);
-    
+
     // Reset SharedPreferences
     SharedPreferences.setMockInitialValues({});
   });
@@ -63,7 +66,7 @@ void main() {
           'serverUrl': serverUrl,
         }),
       });
-      
+
       when(() => mockSecureStorage.read(key: 'gotify_token'))
           .thenAnswer((_) async => validToken);
 
@@ -85,7 +88,7 @@ void main() {
           'serverUrl': serverUrl,
         }),
       });
-      
+
       when(() => mockSecureStorage.read(key: 'gotify_token'))
           .thenAnswer((_) async => null);
 
@@ -107,19 +110,20 @@ void main() {
         serverUrl: serverUrl,
         clientToken: validToken,
       );
-      
+
       final mockResponse = MockResponse();
       when(() => mockResponse.statusCode).thenReturn(200);
       when(() => mockResponse.body).thenReturn('[]');
-      
+
       when(() => mockClient.get(
-        Uri.parse('$serverUrl$applicationEndpoint'),
-        headers: any(named: 'headers'),
-      )).thenAnswer((_) async => mockResponse);
+            Uri.parse('$serverUrl$applicationEndpoint'),
+            headers: any(named: 'headers'),
+          )).thenAnswer((_) async => mockResponse);
 
       // Mock secure storage and shared preferences
-      when(() => mockSecureStorage.write(key: any(named: 'key'), value: any(named: 'value')))
-          .thenAnswer((_) async {});
+      when(() => mockSecureStorage.write(
+          key: any(named: 'key'),
+          value: any(named: 'value'))).thenAnswer((_) async {});
 
       // Act
       final result = await authService.login(config);
@@ -129,8 +133,10 @@ void main() {
       expect(result.serverUrl, serverUrl);
       expect(result.token, validToken);
       expect(result.error, isNull);
-      
-      verify(() => mockSecureStorage.write(key: 'gotify_token', value: validToken)).called(1);
+
+      verify(() =>
+              mockSecureStorage.write(key: 'gotify_token', value: validToken))
+          .called(1);
     });
 
     test('should authenticate with username/password', () async {
@@ -140,34 +146,36 @@ void main() {
         username: username,
         password: password,
       );
-      
+
       // Create client response
       final clientResponse = MockResponse();
       when(() => clientResponse.statusCode).thenReturn(200);
-      when(() => clientResponse.body).thenReturn(jsonEncode({'token': validToken}));
-      
+      when(() => clientResponse.body)
+          .thenReturn(jsonEncode({'token': validToken}));
+
       // Verification response
       final verifyResponse = MockResponse();
       when(() => verifyResponse.statusCode).thenReturn(200);
       when(() => verifyResponse.body).thenReturn('[]');
-      
+
       // Mock client POST for getting token
       when(() => mockClient.post(
-        Uri.parse('$serverUrl$clientEndpoint'),
-        body: any(named: 'body'),
-        headers: any(named: 'headers'),
-        encoding: any(named: 'encoding'),
-      )).thenAnswer((_) async => clientResponse);
-      
+            Uri.parse('$serverUrl$clientEndpoint'),
+            body: any(named: 'body'),
+            headers: any(named: 'headers'),
+            encoding: any(named: 'encoding'),
+          )).thenAnswer((_) async => clientResponse);
+
       // Mock client GET for verification
       when(() => mockClient.get(
-        Uri.parse('$serverUrl$applicationEndpoint'),
-        headers: any(named: 'headers'),
-      )).thenAnswer((_) async => verifyResponse);
+            Uri.parse('$serverUrl$applicationEndpoint'),
+            headers: any(named: 'headers'),
+          )).thenAnswer((_) async => verifyResponse);
 
       // Mock secure storage
-      when(() => mockSecureStorage.write(key: any(named: 'key'), value: any(named: 'value')))
-          .thenAnswer((_) async {});
+      when(() => mockSecureStorage.write(
+          key: any(named: 'key'),
+          value: any(named: 'value'))).thenAnswer((_) async {});
 
       // Act
       final result = await authService.login(config);
@@ -177,8 +185,10 @@ void main() {
       expect(result.serverUrl, serverUrl);
       expect(result.token, validToken);
       expect(result.error, isNull);
-      
-      verify(() => mockSecureStorage.write(key: 'gotify_token', value: validToken)).called(1);
+
+      verify(() =>
+              mockSecureStorage.write(key: 'gotify_token', value: validToken))
+          .called(1);
     });
 
     test('should handle invalid server URL', () async {
@@ -206,13 +216,14 @@ void main() {
 
       final mockResponse = MockResponse();
       when(() => mockResponse.statusCode).thenReturn(401);
-      when(() => mockResponse.body).thenReturn(jsonEncode({'error': 'Invalid token'}));
+      when(() => mockResponse.body)
+          .thenReturn(jsonEncode({'error': 'Invalid token'}));
       when(() => mockResponse.reasonPhrase).thenReturn('Unauthorized');
-      
+
       when(() => mockClient.get(
-        Uri.parse('$serverUrl$applicationEndpoint'),
-        headers: any(named: 'headers'),
-      )).thenAnswer((_) async => mockResponse);
+            Uri.parse('$serverUrl$applicationEndpoint'),
+            headers: any(named: 'headers'),
+          )).thenAnswer((_) async => mockResponse);
 
       // Act
       final result = await authService.login(config);
@@ -228,7 +239,7 @@ void main() {
       // Arrange
       when(() => mockSecureStorage.delete(key: any(named: 'key')))
           .thenAnswer((_) async {});
-      
+
       SharedPreferences.setMockInitialValues({
         'gotify_auth': jsonEncode({
           'isAuthenticated': true,

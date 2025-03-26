@@ -29,7 +29,7 @@ class EmptyMessagesView extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Notifications will appear here',
+            'Notifications will appear here, unless they have been filtered out.',
             style: TextStyle(
               fontSize: 16,
               color: colorScheme.onSurface.withValues(alpha: 0.5),

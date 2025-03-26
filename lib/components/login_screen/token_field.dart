@@ -42,7 +42,7 @@ class _TokenFieldState extends State<TokenField> {
             suffixIcon: IconButton(
               icon: Icon(
                 _obscureToken ? Icons.visibility : Icons.visibility_off,
-                color: colorScheme.onSurface.withOpacity(0.5),
+                color: colorScheme.onSurface.withValues(alpha: 0.5),
                 size: 20,
               ),
               onPressed: () {

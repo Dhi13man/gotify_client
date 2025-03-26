@@ -32,7 +32,7 @@ class ServerUrlField extends StatelessWidget {
             prefixIcon: Icon(Icons.link, color: colorScheme.primary),
             suffixIcon: Icon(
               Icons.check_circle,
-              color: colorScheme.primary.withOpacity(0.5),
+              color: colorScheme.primary.withValues(alpha: 0.5),
               size: 20,
             ),
           ),

@@ -6,6 +6,7 @@ import 'package:gotify_client/components/login_screen/logo_header.dart';
 import 'package:gotify_client/components/login_screen/login_form.dart';
 import 'package:gotify_client/components/login_screen/helper_links.dart';
 import 'package:gotify_client/components/login_screen/version_info.dart';
+import 'package:gotify_client/components/login_screen/help_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -70,42 +71,8 @@ class LoginScreenState extends State<LoginScreen> {
   void _toggleLoginMethod() =>
       setState(() => _showAdvancedLogin = !_showAdvancedLogin);
 
-  void _showHelpDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Getting a Client Token'),
-        content: const SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'To get a client token:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 8),
-              Text('1. Log in to your Gotify server web interface'),
-              Text('2. Go to "CLIENTS" section'),
-              Text('3. Create a new client or select an existing one'),
-              Text('4. Copy the generated token'),
-              SizedBox(height: 16),
-              Text(
-                'Note: Client tokens are used for logging into this app. '
-                'They are different from application tokens, which are used for sending messages.',
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
-    );
-  }
+  void _showHelpDialog() =>
+      showDialog(context: context, builder: (context) => const HelpDialog());
 
   @override
   Widget build(BuildContext context) {

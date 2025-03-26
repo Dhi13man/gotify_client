@@ -5,12 +5,12 @@ import 'package:logging/logging.dart';
 abstract class NotificationService {
   /// Returns whether the service has been initialized
   bool get isInitialized;
-  
+
   /// Initialize notification settings for all supported platforms
   ///
   /// Returns true if initialization was successful, false otherwise
   Future<bool> initialize();
-  
+
   /// Show a notification with the given title and body
   Future<bool> showNotification({
     required int id,
@@ -23,7 +23,7 @@ abstract class NotificationService {
 /// Default implementation of NotificationService using FlutterLocalNotifications
 class LocalNotificationService implements NotificationService {
   static const String _defaultIconPath = '@mipmap/ic_launcher';
-  
+
   final Logger _logger;
   final FlutterLocalNotificationsPlugin _notificationsPlugin;
   bool _isInitialized = false;
@@ -32,8 +32,9 @@ class LocalNotificationService implements NotificationService {
   LocalNotificationService({
     FlutterLocalNotificationsPlugin? notificationsPlugin,
     Logger? logger,
-  }) : _notificationsPlugin = notificationsPlugin ?? FlutterLocalNotificationsPlugin(),
-       _logger = logger ?? Logger('LocalNotificationService');
+  })  : _notificationsPlugin =
+            notificationsPlugin ?? FlutterLocalNotificationsPlugin(),
+        _logger = logger ?? Logger('LocalNotificationService');
 
   @override
   bool get isInitialized => _isInitialized;

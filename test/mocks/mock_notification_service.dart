@@ -5,7 +5,7 @@ class MockNotificationService implements NotificationService {
   bool _isInitialized = false;
   final List<Map<String, dynamic>> notifications = [];
   bool shouldSucceed = true;
-  
+
   @override
   bool get isInitialized => _isInitialized;
 
@@ -30,17 +30,17 @@ class MockNotificationService implements NotificationService {
     if (!_isInitialized || !shouldSucceed) {
       return false;
     }
-    
+
     notifications.add({
       'id': id,
       'title': title,
       'body': body,
       'payload': payload,
     });
-    
+
     return true;
   }
-  
+
   void reset() {
     _isInitialized = false;
     notifications.clear();
