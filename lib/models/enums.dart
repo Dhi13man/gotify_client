@@ -15,7 +15,7 @@ enum PriorityType {
 
   factory PriorityType.fromNumeric(int priority) {
     if (priority >= minValue && priority <= maxValue) {
-      return PriorityType.values.firstWhere((p) => p.numericValue >= priority);
+      return PriorityType.values.lastWhere((p) => p.numericValue <= priority);
     } else {
       throw ArgumentError('Invalid priority number');
     }

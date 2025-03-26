@@ -91,9 +91,7 @@ class SendMessageScreenState extends State<SendMessageScreen> {
     );
   }
 
-  void _updatePriorityValue(int value) {
-    setState(() => _priority = value);
-  }
+  void _updatePriorityValue(int value) => setState(() => _priority = value);
 
   @override
   Widget build(BuildContext context) {
