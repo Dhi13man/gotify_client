@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class MessageField extends StatelessWidget {
   final TextEditingController controller;
-  
+
   const MessageField({
     super.key,
     required this.controller,

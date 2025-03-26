@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class ApplicationTokenField extends StatelessWidget {
   final TextEditingController controller;
-  
+
   const ApplicationTokenField({
     super.key,
     required this.controller,

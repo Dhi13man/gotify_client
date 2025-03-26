@@ -6,7 +6,7 @@ import 'package:gotify_client/theme/app_theme.dart';
 class PrioritySelector extends StatelessWidget {
   final int priority;
   final ValueChanged<int> onPriorityChanged;
-  
+
   const PrioritySelector({
     super.key,
     required this.priority,
@@ -79,8 +79,7 @@ class PrioritySelector extends StatelessWidget {
                   divisions: PriorityType.max.numericValue -
                       PriorityType.min.numericValue,
                   label: priority.toString(),
-                  onChanged: (double value) => 
-                      onPriorityChanged(value.toInt()),
+                  onChanged: (double value) => onPriorityChanged(value.toInt()),
                 ),
               ),
               const SizedBox(height: 16),
@@ -90,17 +89,20 @@ class PrioritySelector extends StatelessWidget {
                   PriorityChip(
                     priority: PriorityType.low,
                     isSelected: priority == PriorityType.low.numericValue,
-                    onTap: () => onPriorityChanged(PriorityType.low.numericValue),
+                    onTap: () =>
+                        onPriorityChanged(PriorityType.low.numericValue),
                   ),
                   PriorityChip(
                     priority: PriorityType.medium,
                     isSelected: priority == PriorityType.medium.numericValue,
-                    onTap: () => onPriorityChanged(PriorityType.medium.numericValue),
+                    onTap: () =>
+                        onPriorityChanged(PriorityType.medium.numericValue),
                   ),
                   PriorityChip(
                     priority: PriorityType.high,
                     isSelected: priority == PriorityType.high.numericValue,
-                    onTap: () => onPriorityChanged(PriorityType.high.numericValue),
+                    onTap: () =>
+                        onPriorityChanged(PriorityType.high.numericValue),
                   ),
                 ],
               ),
