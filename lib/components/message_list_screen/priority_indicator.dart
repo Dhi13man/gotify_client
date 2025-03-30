@@ -13,7 +13,7 @@ class PriorityIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = AppTheme.getPriorityColor(context, priority);
+    final Color color = AppTheme.getPriorityColor(context, priority);
 
     return Row(
       children: [
@@ -29,11 +29,7 @@ class PriorityIndicator extends StatelessWidget {
           const SizedBox(width: 8),
           Text(
             priority.toString(),
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-              color: AppTheme.getTextSecondaryColor(context),
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
           ),
         ],
       ],

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gotify_client/utils/auth_form_validator.dart';
-import 'package:gotify_client/theme/app_theme.dart';
 
 class CredentialFields extends StatefulWidget {
   final TextEditingController usernameController;
@@ -24,18 +23,13 @@ class _CredentialFieldsState extends State<CredentialFields> {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color textColor = AppTheme.getTextPrimaryColor(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Username',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: textColor,
-          ),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -48,13 +42,9 @@ class _CredentialFieldsState extends State<CredentialFields> {
           textInputAction: TextInputAction.next,
         ),
         const SizedBox(height: 20),
-        Text(
+        const Text(
           'Password',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: textColor,
-          ),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -65,14 +55,10 @@ class _CredentialFieldsState extends State<CredentialFields> {
             suffixIcon: IconButton(
               icon: Icon(
                 _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                color: AppTheme.getTextTertiaryColor(context),
                 size: 20,
               ),
-              onPressed: () {
-                setState(() {
-                  _obscurePassword = !_obscurePassword;
-                });
-              },
+              onPressed: () =>
+                  setState(() => _obscurePassword = !_obscurePassword),
             ),
           ),
           validator: AuthFormValidator.validatePassword,

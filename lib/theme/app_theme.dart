@@ -14,8 +14,6 @@ class AppTheme {
   static const Color _secondaryContainerLight = Color(0xFFEDE9FE);
   static const Color _surfaceLight = Color(0xFFF9FAFB);
   static const Color _errorLight = Color(0xFFEF4444);
-  static const Color _warningLight = Color(0xFFF59E0B);
-  static const Color _successLight = Color(0xFF10B981);
   static const Color _borderLight = Color(0xFFD1D5DB);
 
   static const Color _primaryDark = Color(0xFF60A5FA);
@@ -24,17 +22,13 @@ class AppTheme {
   static const Color _secondaryDark = Color(0xFFA78BFA);
   static const Color _surfaceDark = Color(0xFF1F2937);
   static const Color _errorDark = Color(0xFFF87171);
-  static const Color _warningDark = Color(0xFFFBBF24);
-  static const Color _successDark = Color(0xFF34D399);
 
   // Text colors
-  static const Color _textPrimaryLight = Colors.black87;
-  static const Color _textSecondaryLight = Color(0xFF6B7280); // Gray-500
-  static const Color _textTertiaryLight = Color(0xFF9CA3AF); // Gray-400
+  static const Color _textPrimaryLight = Color(0xFF6B7280);
+  static const Color _textSecondaryLight = Colors.black87;
 
   static const Color _textPrimaryDark = Colors.white;
-  static const Color _textSecondaryDark = Color(0xFFD1D5DB); // Gray-300
-  static const Color _textTertiaryDark = Color(0xFF9CA3AF); // Gray-400
+  static const Color _textSecondaryDark = Color(0xFF9CA3AF);
 
   // Priority colors - standardized and centralized
   static const Color _priorityMaxLight = Color(0xFFB91C1C); // Red-700
@@ -50,19 +44,18 @@ class AppTheme {
   static const Color _priorityMinDark = Color(0xFF9CA3AF); // Gray-400
 
   // Background colors
-  static const Color _backgroundLight = Color(0xFFF9FAFB); // Gray-50
-  static const Color _backgroundDark = Color(0xFF1F2937); // Gray-800
+  static const Color _backgroundLight = Color(0xFFF9FAFB);
+  static const Color _backgroundDark = Color(0xFF1F2937);
 
   // Border colors
-  static const Color _borderDark = Color(0xFF374151); // Gray-700
+  static const Color _borderDark = Color(0xFF374151);
 
   /// Returns the light theme for the application
   static ThemeData getLightTheme(BuildContext context) {
-    return ThemeData(
-      useMaterial3: true,
-      textTheme: GoogleFonts.interTextTheme(
-        Theme.of(context).textTheme,
-      ),
+    final ThemeData baseTheme = ThemeData.light(useMaterial3: true);
+    return baseTheme.copyWith(
+      primaryTextTheme: _getTextTheme(baseTheme, _textPrimaryLight),
+      textTheme: _getTextTheme(baseTheme, _textSecondaryLight),
       colorScheme: const ColorScheme.light(
         primary: _primaryLight,
         onPrimary: Colors.white,
@@ -121,10 +114,10 @@ class AppTheme {
 
   /// Returns the dark theme for the application
   static ThemeData getDarkTheme(BuildContext context) {
-    return ThemeData.dark(useMaterial3: true).copyWith(
-      textTheme: GoogleFonts.interTextTheme(
-        ThemeData.dark().textTheme,
-      ),
+    final ThemeData baseTheme = ThemeData.dark(useMaterial3: true);
+    return baseTheme.copyWith(
+      primaryTextTheme: _getTextTheme(baseTheme, _textPrimaryDark),
+      textTheme: _getTextTheme(baseTheme, _textSecondaryDark),
       colorScheme: const ColorScheme.dark(
         primary: _primaryDark,
         onPrimary: _primaryContentDark,
@@ -138,9 +131,7 @@ class AppTheme {
       cardTheme: CardTheme(
         color: _surfaceDark,
         elevation: 1,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Color(0xFF1F2937), // Dark background
@@ -156,19 +147,6 @@ class AppTheme {
         unselectedLabelStyle: TextStyle(fontSize: 12),
       ),
     );
-  }
-
-  // New utility methods for accessing semantic colors
-  static Color getWarningColor(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light
-        ? _warningLight
-        : _warningDark;
-  }
-
-  static Color getSuccessColor(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light
-        ? _successLight
-        : _successDark;
   }
 
   // Helper method for priority colors
@@ -194,23 +172,30 @@ class AppTheme {
     }
   }
 
-  // Text color utilities
-  static Color getTextPrimaryColor(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light
-        ? _textPrimaryLight
-        : _textPrimaryDark;
-  }
-
-  static Color getTextSecondaryColor(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light
-        ? _textSecondaryLight
-        : _textSecondaryDark;
-  }
-
-  static Color getTextTertiaryColor(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light
-        ? _textTertiaryLight
-        : _textTertiaryDark;
+  static TextTheme _getTextTheme(ThemeData themeData, Color color) {
+    return GoogleFonts.interTextTheme(
+      themeData.textTheme.copyWith(
+        displayLarge: themeData.textTheme.displayLarge?.copyWith(color: color),
+        displayMedium:
+            themeData.textTheme.displayMedium?.copyWith(color: color),
+        displaySmall: themeData.textTheme.displaySmall?.copyWith(color: color),
+        headlineLarge:
+            themeData.textTheme.headlineLarge?.copyWith(color: color),
+        headlineMedium:
+            themeData.textTheme.headlineMedium?.copyWith(color: color),
+        headlineSmall:
+            themeData.textTheme.headlineSmall?.copyWith(color: color),
+        titleLarge: themeData.textTheme.titleLarge?.copyWith(color: color),
+        titleMedium: themeData.textTheme.titleMedium?.copyWith(color: color),
+        titleSmall: themeData.textTheme.titleSmall?.copyWith(color: color),
+        bodyLarge: themeData.textTheme.bodyLarge?.copyWith(color: color),
+        bodyMedium: themeData.textTheme.bodyMedium?.copyWith(color: color),
+        bodySmall: themeData.textTheme.bodySmall?.copyWith(color: color),
+        labelLarge: themeData.textTheme.labelLarge?.copyWith(color: color),
+        labelMedium: themeData.textTheme.labelMedium?.copyWith(color: color),
+        labelSmall: themeData.textTheme.labelSmall?.copyWith(color: color),
+      ),
+    );
   }
 
   static Color getBorderColor(BuildContext context) {

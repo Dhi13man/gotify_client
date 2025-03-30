@@ -40,9 +40,7 @@ class PriorityChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-            color: isSelected
-                ? priorityColor
-                : AppTheme.getTextSecondaryColor(context),
+            color: isSelected ? priorityColor : null,
           ),
         ),
       ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:gotify_client/theme/app_theme.dart';
 
 class EmptyMessagesView extends StatelessWidget {
   const EmptyMessagesView({super.key});
@@ -12,11 +11,7 @@ class EmptyMessagesView extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.notifications_off_outlined,
-            size: 80,
-            color: AppTheme.getTextTertiaryColor(context),
-          ),
+          const Icon(Icons.notifications_off_outlined, size: 80),
           const SizedBox(height: 24),
           Text(
             'No messages yet',

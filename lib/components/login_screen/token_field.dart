@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gotify_client/utils/auth_form_validator.dart';
-import 'package:gotify_client/theme/app_theme.dart';
 
 class TokenField extends StatefulWidget {
   final TextEditingController controller;
@@ -21,19 +20,13 @@ class _TokenFieldState extends State<TokenField> {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textColor = AppTheme.getTextPrimaryColor(context);
-
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Client Token',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: textColor,
-          ),
+          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
         TextFormField(
@@ -44,14 +37,9 @@ class _TokenFieldState extends State<TokenField> {
             suffixIcon: IconButton(
               icon: Icon(
                 _obscureToken ? Icons.visibility : Icons.visibility_off,
-                color: AppTheme.getTextTertiaryColor(context),
                 size: 20,
               ),
-              onPressed: () {
-                setState(() {
-                  _obscureToken = !_obscureToken;
-                });
-              },
+              onPressed: () => setState(() => _obscureToken = !_obscureToken),
             ),
           ),
           validator: AuthFormValidator.validateToken,

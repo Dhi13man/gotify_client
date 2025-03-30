@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gotify_client/utils/auth_form_validator.dart';
-import 'package:gotify_client/theme/app_theme.dart';
 
 class ServerUrlField extends StatelessWidget {
   final TextEditingController controller;
@@ -13,18 +12,12 @@ class ServerUrlField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color textColor = AppTheme.getTextPrimaryColor(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Server URL',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: textColor,
-          ),
+          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
         ),
         const SizedBox(height: 8),
         TextFormField(

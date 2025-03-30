@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gotify_client/components/message_list_screen/priority_indicator.dart';
 import 'package:gotify_client/models/message_model.dart';
-import 'package:gotify_client/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class MessageCard extends StatelessWidget {
@@ -60,10 +59,7 @@ class MessageCard extends StatelessWidget {
             const SizedBox(height: 8),
             SelectableText(
               message.message,
-              style: TextStyle(
-                fontSize: 14,
-                color: AppTheme.getTextSecondaryColor(context),
-              ),
+              style: const TextStyle(fontSize: 14),
             ),
             const SizedBox(height: 12),
             Row(
@@ -74,10 +70,7 @@ class MessageCard extends StatelessWidget {
                   children: [
                     Text(
                       _formatTimeAgo(message.date),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppTheme.getTextTertiaryColor(context),
-                      ),
+                      style: const TextStyle(fontSize: 12),
                     ),
                     const SizedBox(width: 8),
                     IconButton(
