@@ -33,7 +33,7 @@ class AppTheme {
   // Priority colors - standardized and centralized
   static const Color _priorityMaxLight = Color(0xFFB91C1C); // Red-700
   static const Color _priorityHighLight = Color(0xFFEA580C); // Orange-600
-  static const Color _priorityMediumLight = Color(0xFFD97706); // Amber-600
+  static const Color _priorityMediumLight = Color.fromARGB(255, 253, 165, 63); // Amber-600
   static const Color _priorityLowLight = Color(0xFF059669); // Emerald-600
   static const Color _priorityMinLight = Color(0xFFD1D5DB); // Gray-300
 

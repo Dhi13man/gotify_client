@@ -20,18 +20,9 @@ class AppBottomNavigationBar extends StatelessWidget {
       unselectedItemColor: colorScheme.onSurface.withValues(alpha: 0.6),
       currentIndex: currentIndex,
       items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.list),
-          label: 'Messages',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.add),
-          label: 'Send',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.home),
-          label: 'Home',
-        ),
+        BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Messages'),
+        BottomNavigationBarItem(icon: Icon(Icons.add), label: 'Send'),
+        BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
       ],
       onTap: onTap,
     );

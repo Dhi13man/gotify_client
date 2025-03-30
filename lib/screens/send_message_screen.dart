@@ -1,13 +1,12 @@
 // ignore_for_file: curly_braces_in_flow_control_structures
 
 import 'package:flutter/material.dart';
+import 'package:gotify_client/components/common/form_field.dart';
 import 'package:gotify_client/models/enums.dart';
+import 'package:gotify_client/utils/form_validator.dart';
 import 'package:provider/provider.dart';
 import 'package:gotify_client/providers/message_provider.dart';
-import 'package:gotify_client/components/send_message_screen/title_field.dart';
-import 'package:gotify_client/components/send_message_screen/message_field.dart';
 import 'package:gotify_client/components/send_message_screen/priority_selector.dart';
-import 'package:gotify_client/components/send_message_screen/application_token_field.dart';
 import 'package:gotify_client/components/send_message_screen/submit_button.dart';
 
 class SendMessageScreen extends StatefulWidget {
@@ -101,16 +100,34 @@ class SendMessageScreenState extends State<SendMessageScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              TitleField(controller: _titleController),
+              AppFormField(
+                label: 'Title',
+                hintText: 'Enter message title',
+                prefixIcon: Icons.title,
+                controller: _titleController,
+                validator: AppFormValidator.validateNotEmpty,
+              ),
               const SizedBox(height: 24),
-              MessageField(controller: _messageController),
+              AppFormField(
+                label: 'Message',
+                hintText: 'Enter message content',
+                prefixIcon: Icons.message,
+                controller: _messageController,
+                validator: AppFormValidator.validateNotEmpty,
+              ),
               const SizedBox(height: 24),
               PrioritySelector(
                 priority: _priority,
                 onPriorityChanged: _updatePriorityValue,
               ),
               const SizedBox(height: 24),
-              ApplicationTokenField(controller: _applicationTokenController),
+              ObscurableFormField(
+                label: 'Application Token',
+                hintText: 'Enter the application token',
+                controller: _applicationTokenController,
+                prefixIcon: Icons.vpn_key,
+                validator: AppFormValidator.validateNotEmpty,
+              ),
               const SizedBox(height: 32),
               SubmitButton(
                 isLoading: _isSending,

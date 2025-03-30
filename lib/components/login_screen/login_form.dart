@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:gotify_client/components/common/form_field.dart';
+import 'package:gotify_client/utils/form_validator.dart';
 import 'package:provider/provider.dart';
 import 'package:gotify_client/providers/auth_provider.dart';
-import 'package:gotify_client/components/login_screen/server_url_field.dart';
-import 'package:gotify_client/components/login_screen/token_field.dart';
 import 'package:gotify_client/components/login_screen/credential_fields.dart';
 
 class LoginForm extends StatelessWidget {
@@ -40,12 +40,30 @@ class LoginForm extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Server URL field is common for both login methods
-            ServerUrlField(controller: serverUrlController),
+            AppFormField(
+              label: 'Server URL',
+              hintText: 'https://gotify.example.com',
+              controller: serverUrlController,
+              prefixIcon: Icons.link,
+              validator: AppFormValidator.validateServerUrl,
+              keyboardType: TextInputType.url,
+              textInputAction: TextInputAction.next,
+              suffixWidget: Icon(
+                Icons.check_circle,
+                color: colorScheme.primary.withValues(alpha: 0.5),
+                size: 20,
+              ),
+            ),
             const SizedBox(height: 20),
             // Show either token field or username/password fields
             if (!showAdvancedLogin)
-              TokenField(
+              ObscurableFormField(
+                label: 'Client Token',
+                hintText: 'Enter your client token',
                 controller: tokenController,
+                prefixIcon: Icons.vpn_key,
+                validator: AppFormValidator.validateNotEmpty,
+                textInputAction: TextInputAction.done,
                 onEditingComplete: onLoginPressed,
               )
             else

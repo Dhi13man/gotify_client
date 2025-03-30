@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gotify_client/components/common/form_field.dart';
-import 'package:gotify_client/utils/auth_form_validator.dart';
+import 'package:gotify_client/utils/form_validator.dart';
 
 class CredentialFields extends StatelessWidget {
   final TextEditingController usernameController;
@@ -24,7 +24,7 @@ class CredentialFields extends StatelessWidget {
           hintText: 'Enter your username',
           controller: usernameController,
           prefixIcon: Icons.person,
-          validator: AuthFormValidator.validateUsername,
+          validator: AppFormValidator.validateNotEmpty,
           textInputAction: TextInputAction.next,
         ),
         ObscurableFormField(
@@ -32,7 +32,7 @@ class CredentialFields extends StatelessWidget {
           hintText: 'Enter your password',
           controller: passwordController,
           prefixIcon: Icons.lock,
-          validator: AuthFormValidator.validatePassword,
+          validator: AppFormValidator.validateNotEmpty,
           textInputAction: TextInputAction.done,
           onEditingComplete: onEditingComplete,
           padding: EdgeInsets.zero,
