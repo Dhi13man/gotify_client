@@ -141,7 +141,7 @@ class MessageService {
   void _closeChannel() {
     if (_channel != null) {
       try {
-        _channel?.sink.close(ws_status.goingAway);
+        _channel?.sink.close(ws_status.normalClosure);
       } catch (e, stackTrace) {
         _logger.warning('Error closing WebSocket', e, stackTrace);
       } finally {
