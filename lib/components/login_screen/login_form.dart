@@ -42,7 +42,6 @@ class LoginForm extends StatelessWidget {
             // Server URL field is common for both login methods
             ServerUrlField(controller: serverUrlController),
             const SizedBox(height: 20),
-
             // Show either token field or username/password fields
             if (!showAdvancedLogin)
               TokenField(
@@ -55,9 +54,7 @@ class LoginForm extends StatelessWidget {
                 passwordController: passwordController,
                 onEditingComplete: onLoginPressed,
               ),
-
             const SizedBox(height: 24),
-
             // Login button
             SizedBox(
               width: double.infinity,
@@ -87,9 +84,7 @@ class LoginForm extends StatelessWidget {
                       ),
               ),
             ),
-
             const SizedBox(height: 16),
-
             // Toggle between login methods
             Center(
               child: TextButton(
