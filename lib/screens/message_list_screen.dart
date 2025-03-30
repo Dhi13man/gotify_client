@@ -45,26 +45,19 @@ class MessageListScreenState extends State<MessageListScreen> {
 
     if (result) {
       scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: const Text('Message deleted successfully'),
-          backgroundColor: Theme.of(context).colorScheme.primary,
-        ),
+        SnackBar(content: const Text('Message deleted successfully')),
       );
     } else {
       // Restore the message if deletion failed
       messageProvider.restoreMessage(message);
       scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: const Text('Failed to delete message'),
-          backgroundColor: Theme.of(context).colorScheme.error,
-        ),
+        SnackBar(content: const Text('Failed to delete message')),
       );
     }
   }
 
   Future<void> _showDeleteConfirmation(Message message) async {
-    final colorScheme = Theme.of(context).colorScheme;
-
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final bool confirmed = await showDialog<bool>(
           context: context,
           builder: (dialogContext) => AlertDialog(
@@ -74,13 +67,14 @@ class MessageListScreenState extends State<MessageListScreen> {
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(false),
-                child: Text('CANCEL',
-                    style: TextStyle(color: colorScheme.primary)),
+                child: const Text('CANCEL'),
               ),
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(true),
-                child:
-                    Text('DELETE', style: TextStyle(color: colorScheme.error)),
+                child: Text(
+                  'DELETE',
+                  style: TextStyle(color: colorScheme.error),
+                ),
               ),
             ],
           ),

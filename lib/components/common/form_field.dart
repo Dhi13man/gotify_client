@@ -31,7 +31,6 @@ class AppFormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return LabeledFormField(
       label: label,
       padding: padding,
@@ -39,7 +38,7 @@ class AppFormField extends StatelessWidget {
         controller: controller,
         decoration: InputDecoration(
           hintText: hintText,
-          prefixIcon: Icon(prefixIcon, color: colorScheme.primary),
+          prefixIcon: Icon(prefixIcon),
           suffixIcon: suffixWidget,
         ),
         validator: validator,
@@ -79,11 +78,10 @@ class ObscurableFormField extends StatefulWidget {
 }
 
 class _ObscurableFormFieldState extends State<ObscurableFormField> {
-  bool _obscureText = true;
+  bool _obscureText = false;
 
   @override
   Widget build(BuildContext context) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return LabeledFormField(
       label: widget.label,
       padding: widget.padding,
@@ -91,10 +89,10 @@ class _ObscurableFormFieldState extends State<ObscurableFormField> {
         controller: widget.controller,
         decoration: InputDecoration(
           hintText: widget.hintText,
-          prefixIcon: Icon(widget.prefixIcon, color: colorScheme.primary),
+          prefixIcon: Icon(widget.prefixIcon),
           suffixIcon: IconButton(
             icon: Icon(
-              _obscureText ? Icons.visibility : Icons.visibility_off,
+              _obscureText ? Icons.visibility_off : Icons.visibility,
               size: 20,
             ),
             onPressed: () => setState(() => _obscureText = !_obscureText),

@@ -16,7 +16,6 @@ class MessageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: Padding(

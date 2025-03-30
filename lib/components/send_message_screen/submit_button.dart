@@ -22,10 +22,7 @@ class SubmitButton extends StatelessWidget {
                 width: 20,
                 height: 20,
                 margin: const EdgeInsets.only(right: 12),
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  color: Theme.of(context).colorScheme.onPrimary,
-                ),
+                child: const CircularProgressIndicator(strokeWidth: 2.5),
               )
             : const Icon(Icons.send),
         label: const Text(

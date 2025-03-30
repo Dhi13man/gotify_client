@@ -12,12 +12,8 @@ class AppBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      backgroundColor: colorScheme.surface,
-      selectedItemColor: colorScheme.primary,
-      unselectedItemColor: colorScheme.onSurface.withValues(alpha: 0.6),
       currentIndex: currentIndex,
       items: const [
         BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Messages'),

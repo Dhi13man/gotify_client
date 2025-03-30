@@ -17,14 +17,10 @@ class AppScaffold extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Row(
-          children: [
-            Icon(
-              Icons.notifications,
-              color: Theme.of(context).colorScheme.primary,
-              size: 24,
-            ),
-            const SizedBox(width: 12),
-            const Text(
+          children: const [
+            Icon(Icons.notifications, size: 24),
+            SizedBox(width: 12),
+            Text(
               'Gotify Messages',
               style: TextStyle(
                 fontWeight: FontWeight.w600,
@@ -42,7 +38,6 @@ class AppScaffold extends StatelessWidget {
             },
           )
         ],
-        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
       ),
       body: SafeArea(child: body),

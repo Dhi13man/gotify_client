@@ -5,7 +5,6 @@ import 'package:gotify_client/models/auth_models.dart';
 import 'package:gotify_client/components/login_screen/logo_header.dart';
 import 'package:gotify_client/components/login_screen/login_form.dart';
 import 'package:gotify_client/components/login_screen/helper_links.dart';
-import 'package:gotify_client/components/login_screen/version_info.dart';
 import 'package:gotify_client/components/login_screen/help_dialog.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -16,11 +15,11 @@ class LoginScreen extends StatefulWidget {
 }
 
 class LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final _serverUrlController = TextEditingController();
-  final _tokenController = TextEditingController();
-  final _usernameController = TextEditingController();
-  final _passwordController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _serverUrlController = TextEditingController();
+  final TextEditingController _tokenController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _showAdvancedLogin = false;
 
   @override
@@ -40,8 +39,10 @@ class LoginScreenState extends State<LoginScreen> {
     final config = _createAuthConfig();
 
     // Store ScaffoldMessenger before the async gap
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final ScaffoldMessengerState scaffoldMessenger =
+        ScaffoldMessenger.of(context);
+    final AuthProvider authProvider =
+        Provider.of<AuthProvider>(context, listen: false);
 
     final success = await authProvider.login(config);
 
@@ -98,7 +99,10 @@ class LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
               HelperLinks(onHelpPressed: _showHelpDialog),
               const SizedBox(height: 24),
-              const VersionInfo(),
+              const Text(
+                'Gotify Client v1.0.0',
+                style: TextStyle(fontSize: 12),
+              ),
             ],
           ),
         ),

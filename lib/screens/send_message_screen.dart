@@ -69,10 +69,7 @@ class SendMessageScreenState extends State<SendMessageScreen> {
 
   void _showSuccessMessage() {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Message sent successfully'),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-      ),
+      SnackBar(content: const Text('Message sent successfully')),
     );
   }
 

@@ -33,7 +33,6 @@ class LoginForm extends StatelessWidget {
     final AuthProvider authProvider = Provider.of<AuthProvider>(context);
     return Card(
       elevation: 0,
-      color: colorScheme.surface,
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Column(
@@ -111,10 +110,7 @@ class LoginForm extends StatelessWidget {
                   showAdvancedLogin
                       ? 'Use token authentication instead'
                       : 'Use username & password instead',
-                  style: TextStyle(
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: TextStyle(fontWeight: FontWeight.w500),
                 ),
               ),
             ),

@@ -10,20 +10,15 @@ class MessageField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
     return TextFormField(
       controller: controller,
       decoration: InputDecoration(
         labelText: 'Message',
         hintText: 'Enter your message content',
         alignLabelWithHint: true,
-        prefixIcon: Padding(
-          padding: const EdgeInsets.only(bottom: 80),
-          child: Icon(
-            Icons.message,
-            color: colorScheme.primary,
-          ),
+        prefixIcon: const Padding(
+          padding: EdgeInsets.only(bottom: 80),
+          child: Icon(Icons.message),
         ),
       ),
       maxLines: 5,

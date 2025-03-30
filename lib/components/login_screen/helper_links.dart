@@ -10,16 +10,12 @@ class HelperLinks extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
     return TextButton.icon(
       onPressed: onHelpPressed,
-      icon: Icon(Icons.help_outline, size: 18, color: colorScheme.primary),
+      icon: const Icon(Icons.help_outline, size: 18),
       label: Text(
         'How to get a client token?',
-        style: TextStyle(
-          color: colorScheme.primary,
-          fontSize: 14,
-        ),
+        style: const TextStyle(fontSize: 14),
       ),
     );
   }

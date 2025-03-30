@@ -10,31 +10,19 @@ class LogoHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
     return Column(
       children: [
         Container(
           width: 80,
           height: 80,
-          decoration: BoxDecoration(
-            color: colorScheme.primaryContainer,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(
-            Icons.notifications_active,
-            size: 40,
-            color: colorScheme.primary,
-          ),
+          decoration: const BoxDecoration(shape: BoxShape.circle),
+          child: const Icon(Icons.notifications_active, size: 40),
         ),
         const SizedBox(height: 24),
-        Text(
+        const Text(
           'Welcome to Gotify',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.w600,
-            color: colorScheme.onSurface,
-          ),
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 8),
         Text(

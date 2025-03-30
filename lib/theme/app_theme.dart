@@ -33,7 +33,8 @@ class AppTheme {
   // Priority colors - standardized and centralized
   static const Color _priorityMaxLight = Color(0xFFB91C1C); // Red-700
   static const Color _priorityHighLight = Color(0xFFEA580C); // Orange-600
-  static const Color _priorityMediumLight = Color.fromARGB(255, 253, 165, 63); // Amber-600
+  static const Color _priorityMediumLight =
+      Color.fromARGB(255, 253, 165, 63); // Amber-600
   static const Color _priorityLowLight = Color(0xFF059669); // Emerald-600
   static const Color _priorityMinLight = Color(0xFFD1D5DB); // Gray-300
 
@@ -100,6 +101,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: _primaryLight, width: 2),
         ),
+        prefixIconColor: _primaryLight,
         filled: true,
         fillColor: Colors.white,
       ),
@@ -111,6 +113,8 @@ class AppTheme {
         unselectedLabelStyle: TextStyle(fontSize: 12),
       ),
       scaffoldBackgroundColor: _backgroundLight,
+      iconTheme: baseTheme.iconTheme.copyWith(color: _secondaryLight),
+      primaryIconTheme: baseTheme.iconTheme.copyWith(color: _primaryLight),
     );
   }
 
@@ -163,6 +167,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(8),
           borderSide: const BorderSide(color: _primaryDark, width: 2),
         ),
+        prefixIconColor: _primaryDark,
         filled: true,
         fillColor: Color(0xFF374151), // Darker background for input fields
       ),
@@ -174,14 +179,16 @@ class AppTheme {
         unselectedLabelStyle: TextStyle(fontSize: 12),
       ),
       scaffoldBackgroundColor: _backgroundDark,
+      primaryIconTheme: baseTheme.iconTheme.copyWith(color: _primaryDark),
+      iconTheme: baseTheme.iconTheme.copyWith(color: _secondaryDark),
     );
   }
 
   // Helper method for priority colors
   static Color getPriorityColor(BuildContext context, int priority) {
-    final bool isLightMode = Theme.of(context).brightness == Brightness.light;
+    final ThemeData theme = Theme.of(context);
+    final bool isLightMode = theme.brightness == Brightness.light;
     final PriorityType priorityType = PriorityType.fromNumeric(priority);
-
     switch (priorityType) {
       case PriorityType.max:
         return isLightMode ? _priorityMaxLight : _priorityMaxDark;
@@ -194,9 +201,7 @@ class AppTheme {
       case PriorityType.min:
         return isLightMode ? _priorityMinLight : _priorityMinDark;
       default:
-        return Theme.of(context)
-            .colorScheme
-            .primary; // Default to primary color
+        return theme.colorScheme.primary;
     }
   }
 
