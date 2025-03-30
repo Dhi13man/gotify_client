@@ -47,16 +47,16 @@ class GotifyHttpClient implements GotifyClient {
   String? _password;
   AuthType _authType = AuthType.clientToken;
 
+  /// Creates a new HTTP client instance for the specified server
+  GotifyHttpClient(String serverUrl, {http.Client? httpClient})
+      : _serverUrl = _normalizeUrl(serverUrl),
+        _httpClient = httpClient ?? http.Client();
+
   @override
   String get serverUrl => _serverUrl;
 
   @override
   AuthType get authType => _authType;
-
-  /// Creates a new HTTP client instance for the specified server
-  GotifyHttpClient(String serverUrl, {http.Client? httpClient})
-      : _serverUrl = _normalizeUrl(serverUrl),
-        _httpClient = httpClient ?? http.Client();
 
   static String _normalizeUrl(String url) {
     return url.trim().replaceAll(RegExp(r'/+$'), '');
