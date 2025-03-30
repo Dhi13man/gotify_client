@@ -19,6 +19,7 @@ class PriorityChip extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final Color priorityColor =
         AppTheme.getPriorityColor(context, priority.numericValue);
+    final Color borderColor = AppTheme.getBorderColor(context);
 
     return GestureDetector(
       onTap: onTap,
@@ -30,9 +31,8 @@ class PriorityChip extends StatelessWidget {
               : colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: isSelected
-                ? priorityColor
-                : colorScheme.outline.withValues(alpha: 0.3),
+            color:
+                isSelected ? priorityColor : borderColor.withValues(alpha: 0.3),
           ),
         ),
         child: Text(
@@ -40,7 +40,9 @@ class PriorityChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-            color: isSelected ? priorityColor : colorScheme.onSurface,
+            color: isSelected
+                ? priorityColor
+                : AppTheme.getTextSecondaryColor(context),
           ),
         ),
       ),

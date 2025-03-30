@@ -69,24 +69,22 @@ class SendMessageScreenState extends State<SendMessageScreen> {
   }
 
   void _showSuccessMessage() {
-    final colorScheme = Theme.of(context).colorScheme;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text('Message sent successfully'),
-        backgroundColor: colorScheme.primary,
+        backgroundColor: Theme.of(context).colorScheme.primary,
       ),
     );
   }
 
   void _showErrorMessage() {
-    final colorScheme = Theme.of(context).colorScheme;
     final errorMessage =
         Provider.of<MessageProvider>(context, listen: false).error ??
             'Failed to send message';
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(errorMessage),
-        backgroundColor: colorScheme.error,
+        backgroundColor: Theme.of(context).colorScheme.error,
       ),
     );
   }

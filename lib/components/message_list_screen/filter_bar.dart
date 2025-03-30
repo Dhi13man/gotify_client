@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gotify_client/models/enums.dart';
 import 'package:gotify_client/models/message_model.dart';
+import 'package:gotify_client/theme/app_theme.dart';
 
 class FilterBar extends StatelessWidget {
   final PriorityType selectedFilter;
@@ -49,23 +50,26 @@ class FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = Theme.of(context).colorScheme.primary;
+    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final Color borderColor = AppTheme.getBorderColor(context);
 
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? primaryColor : Colors.white,
+          color: isSelected ? colorScheme.primary : colorScheme.surface,
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: isSelected ? primaryColor : const Color(0xFFD1D5DB),
+            color: isSelected ? colorScheme.primary : borderColor,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : const Color(0xFF6B7280),
+            color: isSelected
+                ? colorScheme.onPrimary
+                : AppTheme.getTextSecondaryColor(context),
             fontSize: 14,
             fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
           ),

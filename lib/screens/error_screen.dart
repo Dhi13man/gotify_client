@@ -12,7 +12,7 @@ class ErrorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
+    final ThemeData theme = Theme.of(context);
 
     return Center(
       child: Column(
@@ -21,14 +21,13 @@ class ErrorScreen extends StatelessWidget {
           Icon(
             Icons.error_outline,
             size: 64,
-            color: colorScheme.error,
+            color: theme.colorScheme.error,
           ),
           const SizedBox(height: 16),
           Text(
             'Error: ${errorMessage ?? "Unknown error"}',
-            style: TextStyle(
-              color: colorScheme.error,
-              fontSize: 16,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.error,
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gotify_client/theme/app_theme.dart';
 
 class EmptyMessagesView extends StatelessWidget {
   const EmptyMessagesView({super.key});
@@ -14,9 +15,7 @@ class EmptyMessagesView extends StatelessWidget {
           Icon(
             Icons.notifications_off_outlined,
             size: 80,
-            color: Theme.of(context).brightness == Brightness.light
-                ? const Color(0xFFD1D5DB) // Gray-300
-                : const Color(0xFF6B7280), // Gray-500
+            color: AppTheme.getTextTertiaryColor(context),
           ),
           const SizedBox(height: 24),
           Text(

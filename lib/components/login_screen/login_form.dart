@@ -4,6 +4,7 @@ import 'package:gotify_client/providers/auth_provider.dart';
 import 'package:gotify_client/components/login_screen/server_url_field.dart';
 import 'package:gotify_client/components/login_screen/token_field.dart';
 import 'package:gotify_client/components/login_screen/credential_fields.dart';
+import 'package:gotify_client/theme/app_theme.dart';
 
 class LoginForm extends StatelessWidget {
   final GlobalKey<FormState> formKey;
@@ -31,12 +32,13 @@ class LoginForm extends StatelessWidget {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final authProvider = Provider.of<AuthProvider>(context);
+    final borderColor = AppTheme.getBorderColor(context);
 
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: colorScheme.outline.withValues(alpha: 0.2)),
+        side: BorderSide(color: borderColor.withAlpha(51)),
       ),
       color: colorScheme.surface,
       child: Padding(

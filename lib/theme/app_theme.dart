@@ -27,6 +27,35 @@ class AppTheme {
   static const Color _warningDark = Color(0xFFFBBF24);
   static const Color _successDark = Color(0xFF34D399);
 
+  // Text colors
+  static const Color _textPrimaryLight = Colors.black87;
+  static const Color _textSecondaryLight = Color(0xFF6B7280); // Gray-500
+  static const Color _textTertiaryLight = Color(0xFF9CA3AF); // Gray-400
+
+  static const Color _textPrimaryDark = Colors.white;
+  static const Color _textSecondaryDark = Color(0xFFD1D5DB); // Gray-300
+  static const Color _textTertiaryDark = Color(0xFF9CA3AF); // Gray-400
+
+  // Priority colors - standardized and centralized
+  static const Color _priorityMaxLight = Color(0xFFB91C1C); // Red-700
+  static const Color _priorityHighLight = Color(0xFFEA580C); // Orange-600
+  static const Color _priorityMediumLight = Color(0xFFD97706); // Amber-600
+  static const Color _priorityLowLight = Color(0xFF059669); // Emerald-600
+  static const Color _priorityMinLight = Color(0xFFD1D5DB); // Gray-300
+
+  static const Color _priorityMaxDark = Color(0xFFF87171); // Red-400
+  static const Color _priorityHighDark = Color(0xFFFB923C); // Orange-400
+  static const Color _priorityMediumDark = Color(0xFFFBBF24); // Amber-400
+  static const Color _priorityLowDark = Color(0xFF34D399); // Emerald-400
+  static const Color _priorityMinDark = Color(0xFF9CA3AF); // Gray-400
+
+  // Background colors
+  static const Color _backgroundLight = Color(0xFFF9FAFB); // Gray-50
+  static const Color _backgroundDark = Color(0xFF1F2937); // Gray-800
+
+  // Border colors
+  static const Color _borderDark = Color(0xFF374151); // Gray-700
+
   /// Returns the light theme for the application
   static ThemeData getLightTheme(BuildContext context) {
     return ThemeData(
@@ -144,21 +173,55 @@ class AppTheme {
 
   // Helper method for priority colors
   static Color getPriorityColor(BuildContext context, int priority) {
-    final ColorScheme colorScheme = Theme.of(context).colorScheme;
+    final bool isLightMode = Theme.of(context).brightness == Brightness.light;
     final PriorityType priorityType = PriorityType.fromNumeric(priority);
+
     switch (priorityType) {
       case PriorityType.max:
-        return Color(0xFFB91C1C);
+        return isLightMode ? _priorityMaxLight : _priorityMaxDark;
       case PriorityType.high:
-        return Color.fromARGB(255, 238, 139, 85);
+        return isLightMode ? _priorityHighLight : _priorityHighDark;
       case PriorityType.medium:
-        return Color.fromARGB(255, 255, 190, 48);
+        return isLightMode ? _priorityMediumLight : _priorityMediumDark;
       case PriorityType.low:
-        return Color.fromARGB(255, 51, 152, 88);
+        return isLightMode ? _priorityLowLight : _priorityLowDark;
       case PriorityType.min:
-        return Color(0xFFD1D5DB);
+        return isLightMode ? _priorityMinLight : _priorityMinDark;
       default:
-        return colorScheme.primary; // Default to primary color
+        return Theme.of(context)
+            .colorScheme
+            .primary; // Default to primary color
     }
+  }
+
+  // Text color utilities
+  static Color getTextPrimaryColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.light
+        ? _textPrimaryLight
+        : _textPrimaryDark;
+  }
+
+  static Color getTextSecondaryColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.light
+        ? _textSecondaryLight
+        : _textSecondaryDark;
+  }
+
+  static Color getTextTertiaryColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.light
+        ? _textTertiaryLight
+        : _textTertiaryDark;
+  }
+
+  static Color getBorderColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.light
+        ? _borderLight
+        : _borderDark;
+  }
+
+  static Color getBackgroundColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.light
+        ? _backgroundLight
+        : _backgroundDark;
   }
 }

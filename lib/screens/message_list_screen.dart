@@ -32,9 +32,9 @@ class MessageListScreenState extends State<MessageListScreen> {
 
   Future<void> _deleteMessage(Message message) async {
     // Store context objects before async operation
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    final colorScheme = Theme.of(context).colorScheme;
-    final messageProvider =
+    final ScaffoldMessengerState scaffoldMessenger =
+        ScaffoldMessenger.of(context);
+    final MessageProvider messageProvider =
         Provider.of<MessageProvider>(context, listen: false);
 
     // First, optimistically remove the message from the local state
@@ -47,7 +47,7 @@ class MessageListScreenState extends State<MessageListScreen> {
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: const Text('Message deleted successfully'),
-          backgroundColor: colorScheme.primary,
+          backgroundColor: Theme.of(context).colorScheme.primary,
         ),
       );
     } else {
@@ -56,7 +56,7 @@ class MessageListScreenState extends State<MessageListScreen> {
       scaffoldMessenger.showSnackBar(
         SnackBar(
           content: const Text('Failed to delete message'),
-          backgroundColor: colorScheme.error,
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gotify_client/components/message_list_screen/priority_indicator.dart';
 import 'package:gotify_client/models/message_model.dart';
+import 'package:gotify_client/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class MessageCard extends StatelessWidget {
@@ -28,16 +29,13 @@ class MessageCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 12,
-                  backgroundColor: Theme.of(context)
-                      .colorScheme
-                      .primary
-                      .withValues(alpha: 0.1),
+                  backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
                   child: Text(
                     message.appid.toString(),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: colorScheme.primary,
                     ),
                   ),
                 ),
@@ -64,9 +62,7 @@ class MessageCard extends StatelessWidget {
               message.message,
               style: TextStyle(
                 fontSize: 14,
-                color: Theme.of(context).brightness == Brightness.light
-                    ? const Color(0xFF4B5563) // Gray-600
-                    : const Color(0xFFD1D5DB), // Gray-300
+                color: AppTheme.getTextSecondaryColor(context),
               ),
             ),
             const SizedBox(height: 12),
@@ -80,9 +76,7 @@ class MessageCard extends StatelessWidget {
                       _formatTimeAgo(message.date),
                       style: TextStyle(
                         fontSize: 12,
-                        color: Theme.of(context).brightness == Brightness.light
-                            ? const Color(0xFF6B7280) // Gray-500
-                            : const Color(0xFF9CA3AF), // Gray-400
+                        color: AppTheme.getTextTertiaryColor(context),
                       ),
                     ),
                     const SizedBox(width: 8),

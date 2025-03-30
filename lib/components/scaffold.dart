@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gotify_client/providers/auth_provider.dart';
+import 'package:gotify_client/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
 class AppScaffold extends StatelessWidget {
@@ -15,9 +16,7 @@ class AppScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).brightness == Brightness.light
-          ? const Color(0xFFF9FAFB) // Gray-50
-          : const Color(0xFF1F2937), // Gray-800
+      backgroundColor: AppTheme.getBackgroundColor(context),
       appBar: AppBar(
         title: Row(
           children: [
@@ -45,9 +44,7 @@ class AppScaffold extends StatelessWidget {
             },
           )
         ],
-        backgroundColor: Theme.of(context).brightness == Brightness.light
-            ? Colors.white
-            : const Color(0xFF1F2937), // Gray-800
+        backgroundColor: Theme.of(context).colorScheme.surface,
         elevation: 0,
       ),
       body: SafeArea(child: body),
@@ -55,9 +52,7 @@ class AppScaffold extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             top: BorderSide(
-              color: Theme.of(context).brightness == Brightness.light
-                  ? const Color(0xFFE5E7EB) // Gray-200
-                  : const Color(0xFF374151), // Gray-700
+              color: AppTheme.getBorderColor(context),
               width: 1,
             ),
           ),

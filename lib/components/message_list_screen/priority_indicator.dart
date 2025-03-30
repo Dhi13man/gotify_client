@@ -32,9 +32,7 @@ class PriorityIndicator extends StatelessWidget {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: Theme.of(context).brightness == Brightness.light
-                  ? const Color(0xFF6B7280)
-                  : const Color(0xFFD1D5DB),
+              color: AppTheme.getTextSecondaryColor(context),
             ),
           ),
         ],
