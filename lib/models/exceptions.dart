@@ -17,8 +17,7 @@ class ClientException implements Exception {
 /// Exception thrown when authentication fails
 class ClientAuthenticationException extends ClientException {
   /// Creates an authentication exception
-  const ClientAuthenticationException(String message, {int? statusCode})
-      : super(message, statusCode: statusCode);
+  const ClientAuthenticationException(super.message, {super.statusCode});
 
   @override
   String toString() =>
@@ -28,8 +27,7 @@ class ClientAuthenticationException extends ClientException {
 /// Exception thrown when input validation fails
 class ClientValidationException extends ClientException {
   /// Creates a validation exception
-  const ClientValidationException(String message, {int? statusCode})
-      : super(message, statusCode: statusCode);
+  const ClientValidationException(super.message, {super.statusCode});
 
   @override
   String toString() =>
@@ -39,7 +37,7 @@ class ClientValidationException extends ClientException {
 /// Exception thrown when a request times out
 class ClientTimeoutException extends ClientException {
   /// Creates a timeout exception
-  const ClientTimeoutException(String message) : super(message);
+  const ClientTimeoutException(super.message);
 
   @override
   String toString() => 'Request timeout: $message';
@@ -48,7 +46,7 @@ class ClientTimeoutException extends ClientException {
 /// Exception thrown when a network error occurs
 class ClientNetworkException extends ClientException {
   /// Creates a network exception
-  const ClientNetworkException(String message) : super(message);
+  const ClientNetworkException(super.message);
 
   @override
   String toString() => 'Network error: $message';
@@ -57,8 +55,7 @@ class ClientNetworkException extends ClientException {
 /// Exception thrown when a resource isn't found
 class ClientResourceNotFoundException extends ClientException {
   /// Creates a not found exception
-  const ClientResourceNotFoundException(String message, {int? statusCode})
-      : super(message, statusCode: statusCode);
+  const ClientResourceNotFoundException(super.message, {super.statusCode});
 
   @override
   String toString() =>
@@ -68,8 +65,7 @@ class ClientResourceNotFoundException extends ClientException {
 /// Exception thrown when the server returns an error
 class ClientServerException extends ClientException {
   /// Creates a server exception
-  const ClientServerException(String message, {int? statusCode})
-      : super(message, statusCode: statusCode);
+  const ClientServerException(super.message, {super.statusCode});
 
   @override
   String toString() =>
@@ -79,7 +75,7 @@ class ClientServerException extends ClientException {
 /// Exception thrown when data formatting fails
 class ClientFormatException extends ClientException {
   /// Creates a format exception
-  const ClientFormatException(String message) : super(message);
+  const ClientFormatException(super.message);
 
   @override
   String toString() => 'Format error: $message';

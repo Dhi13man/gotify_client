@@ -31,8 +31,6 @@ class AppTheme {
   static const Color _textSecondaryLight = Color(0xFF6E7191);
   static const Color _textPrimaryDark = Color(0xFFF5F5FC);
   static const Color _textSecondaryDark = Color(0xFFB9BDD1);
-  static const Color _backgroundLight = Color(0xFFF7F9FC);
-  static const Color _backgroundDark = Color(0xFF14141F);
 
   // Priority colors
   static const Color _priorityMaxLight = Color(0xFFDC2626);
@@ -60,7 +58,6 @@ class AppTheme {
         onSecondary: Colors.white,
         secondaryContainer: _secondaryContainerLight,
         surface: _surfaceLight,
-        background: _backgroundLight,
         error: _errorLight,
         onError: Colors.white,
         tertiary: _accentLight,
@@ -70,7 +67,10 @@ class AppTheme {
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: _borderLight.withOpacity(0.3), width: 0.5),
+          side: BorderSide(
+            color: _borderLight.withValues(alpha: 0.3),
+            width: 0.5,
+          ),
         ),
         color: _surfaceLight,
       ),
@@ -139,7 +139,7 @@ class AppTheme {
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide:
-              BorderSide(color: _borderLight.withOpacity(0.5), width: 1),
+              BorderSide(color: _borderLight.withValues(alpha: 0.5), width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -154,7 +154,7 @@ class AppTheme {
         filled: true,
         fillColor: _surfaceLight,
         hintStyle: TextStyle(
-          color: _textSecondaryLight.withOpacity(0.7),
+          color: _textSecondaryLight.withValues(alpha: 0.7),
           fontWeight: FontWeight.w400,
         ),
       ),
@@ -194,7 +194,7 @@ class AppTheme {
         thickness: 0.5,
         space: 24,
       ),
-      scaffoldBackgroundColor: _backgroundLight,
+      scaffoldBackgroundColor: _surfaceLight,
       iconTheme: baseTheme.iconTheme.copyWith(
         color: _secondaryLight,
         size: 24,
@@ -239,7 +239,6 @@ class AppTheme {
         secondary: _secondaryDark,
         onSecondary: _primaryContentDark,
         surface: _surfaceDark,
-        background: _backgroundDark,
         error: _errorDark,
         onError: _primaryContentDark,
         tertiary: _accentDark,
@@ -249,7 +248,8 @@ class AppTheme {
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: _borderDark.withOpacity(0.3), width: 0.5),
+          side:
+              BorderSide(color: _borderDark.withValues(alpha: 0.3), width: 0.5),
         ),
         color: _surfaceDark,
       ),
@@ -317,7 +317,8 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: _borderDark.withOpacity(0.5), width: 1),
+          borderSide:
+              BorderSide(color: _borderDark.withValues(alpha: 0.5), width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -330,9 +331,9 @@ class AppTheme {
         prefixIconColor: _secondaryDark,
         suffixIconColor: _secondaryDark,
         filled: true,
-        fillColor: _surfaceDark.withOpacity(0.8),
+        fillColor: _surfaceDark.withValues(alpha: 0.8),
         hintStyle: TextStyle(
-          color: _textSecondaryDark.withOpacity(0.7),
+          color: _textSecondaryDark.withValues(alpha: 0.7),
           fontWeight: FontWeight.w400,
         ),
       ),
@@ -372,7 +373,7 @@ class AppTheme {
         thickness: 0.5,
         space: 24,
       ),
-      scaffoldBackgroundColor: _backgroundDark,
+      scaffoldBackgroundColor: _surfaceDark,
       iconTheme: baseTheme.iconTheme.copyWith(
         color: _secondaryDark,
         size: 24,

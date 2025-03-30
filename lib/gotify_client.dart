@@ -1,5 +1,3 @@
-library gotify_client;
-
 // Client interfaces and implementations
 export 'package:gotify_client/clients/gotify_client.dart';
 export 'package:gotify_client/clients/http_client_impl.dart';
