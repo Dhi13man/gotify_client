@@ -113,17 +113,17 @@ class SendMessageScreenState extends State<SendMessageScreen> {
                 validator: AppFormValidator.validateNotEmpty,
               ),
               const SizedBox(height: 24),
-              PrioritySelector(
-                priority: _priority,
-                onPriorityChanged: _updatePriorityValue,
-              ),
-              const SizedBox(height: 24),
               ObscurableFormField(
                 label: 'Application Token',
                 hintText: 'Enter the application token',
                 controller: _applicationTokenController,
                 prefixIcon: Icons.vpn_key,
                 validator: AppFormValidator.validateNotEmpty,
+              ),
+              const SizedBox(height: 24),
+              PrioritySelector(
+                priority: _priority,
+                onPriorityChanged: _updatePriorityValue,
               ),
               const SizedBox(height: 32),
               SubmitButton(

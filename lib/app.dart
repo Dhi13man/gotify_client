@@ -24,7 +24,7 @@ class GotifyClientApp extends StatelessWidget {
         theme: AppTheme.getLightTheme(context),
         darkTheme: AppTheme.getDarkTheme(context),
         themeMode: ThemeMode.system,
-        home: HomeWrapper(),
+        home: const HomeWrapper(),
       ),
     );
   }
