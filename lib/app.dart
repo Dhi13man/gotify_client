@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gotify_client/components/bottom_nav_bar.dart';
-import 'package:gotify_client/components/scaffold.dart';
+import 'package:gotify_client/components/common/bottom_nav_bar.dart';
+import 'package:gotify_client/components/common/scaffold.dart';
 import 'package:gotify_client/providers/auth_provider.dart';
 import 'package:gotify_client/providers/message_provider.dart';
 import 'package:gotify_client/screens/login_screen.dart';
