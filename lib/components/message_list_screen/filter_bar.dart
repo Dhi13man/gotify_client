@@ -75,6 +75,6 @@ class FilterChip extends StatelessWidget {
 // Helper function to filter messages based on selected filter
 List<Message> filterMessages(List<Message> messages, PriorityType filter) {
   return messages
-      .where((message) => message.priority >= filter.numericValue)
+      .where((message) => (message.priority ?? 0) >= filter.numericValue)
       .toList();
 }

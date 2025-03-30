@@ -101,20 +101,20 @@ class MessageListScreenState extends State<MessageListScreen> {
     return grouped;
   }
 
-  String _getDateGroupKey(String dateString) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
+  String _getDateGroupKey(DateTime date) {
+    final DateTime now = DateTime.now();
+    final DateTime today = DateTime(now.year, now.month, now.day);
+    final DateTime yesterday = today.subtract(const Duration(days: 1));
 
-    final date = DateTime.parse(dateString).toLocal();
-    final messageDate = DateTime(date.year, date.month, date.day);
-
+    final DateTime localDate = date.toLocal();
+    final DateTime messageDate =
+        DateTime(localDate.year, localDate.month, localDate.day);
     if (messageDate == today) {
       return 'Today';
     } else if (messageDate == yesterday) {
       return 'Yesterday';
     } else {
-      return DateFormat('MMMM d, yyyy').format(date);
+      return DateFormat('MMMM d, yyyy').format(localDate);
     }
   }
 

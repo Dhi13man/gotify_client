@@ -233,8 +233,7 @@ class MessageProvider extends ChangeNotifier {
     // Find the right position to insert based on date
     int insertIndex = 0;
     while (insertIndex < updatedMessages.length &&
-        DateTime.parse(updatedMessages[insertIndex].date)
-            .isAfter(DateTime.parse(message.date))) {
+        updatedMessages[insertIndex].date.isAfter(message.date)) {
       insertIndex++;
     }
 

@@ -29,7 +29,7 @@ class MessageCard extends StatelessWidget {
                   radius: 12,
                   backgroundColor: colorScheme.primary.withValues(alpha: 0.1),
                   child: Text(
-                    message.appid.toString(),
+                    message.applicationId.toString(),
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -39,7 +39,7 @@ class MessageCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'App ID: ${message.appid}',
+                  'App ID: ${message.applicationId}',
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -49,7 +49,7 @@ class MessageCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              message.title.isNotEmpty ? message.title : 'Notification',
+              message.title ?? '',
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
@@ -64,7 +64,7 @@ class MessageCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                PriorityIndicator(priority: message.priority),
+                PriorityIndicator(priority: message.priority ?? 0),
                 Row(
                   children: [
                     Text(
@@ -91,14 +91,13 @@ class MessageCard extends StatelessWidget {
     );
   }
 
-  String _formatTimeAgo(String dateString) {
+  String _formatTimeAgo(DateTime date) {
     try {
-      final now = DateTime.now();
-      final date = DateTime.parse(dateString).toLocal();
-      final difference = now.difference(date);
-
+      final DateTime localDate = date.toLocal();
+      final DateTime now = DateTime.now();
+      final Duration difference = now.difference(localDate);
       if (difference.inDays > 0) {
-        return _formatDateTime(dateString);
+        return DateFormat('MMM d, y HH:mm').format(localDate);
       } else if (difference.inHours > 0) {
         return '${difference.inHours}h ago';
       } else if (difference.inMinutes > 0) {
@@ -107,16 +106,7 @@ class MessageCard extends StatelessWidget {
         return 'Just now';
       }
     } catch (e) {
-      return dateString;
-    }
-  }
-
-  String _formatDateTime(String dateString) {
-    try {
-      final dateTime = DateTime.parse(dateString);
-      return DateFormat('MMM d, y HH:mm').format(dateTime.toLocal());
-    } catch (e) {
-      return dateString;
+      return date.toIso8601String();
     }
   }
 }
