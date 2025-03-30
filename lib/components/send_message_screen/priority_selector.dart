@@ -17,8 +17,6 @@ class PrioritySelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
     final Color priorityColor = AppTheme.getPriorityColor(context, priority);
-    final borderColor = AppTheme.getBorderColor(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -26,9 +24,6 @@ class PrioritySelector extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
             color: colorScheme.surface,
-            border: Border.all(
-              color: borderColor.withValues(alpha: 0.3),
-            ),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(

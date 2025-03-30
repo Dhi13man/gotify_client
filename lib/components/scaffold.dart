@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:gotify_client/providers/auth_provider.dart';
-import 'package:gotify_client/theme/app_theme.dart';
 import 'package:provider/provider.dart';
 
 class AppScaffold extends StatelessWidget {
@@ -16,7 +15,6 @@ class AppScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.getBackgroundColor(context),
       appBar: AppBar(
         title: Row(
           children: [
@@ -48,17 +46,7 @@ class AppScaffold extends StatelessWidget {
         elevation: 0,
       ),
       body: SafeArea(child: body),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            top: BorderSide(
-              color: AppTheme.getBorderColor(context),
-              width: 1,
-            ),
-          ),
-        ),
-        child: bottomNavBar,
-      ),
+      bottomNavigationBar: Container(child: bottomNavBar),
     );
   }
 }

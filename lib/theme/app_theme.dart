@@ -70,9 +70,10 @@ class AppTheme {
       cardTheme: CardTheme(
         elevation: 1, // Reduced elevation for subtle shadow
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: _borderLight),
         ),
-        color: Colors.white,
+        color: _surfaceLight,
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.white, // Updated to white background
@@ -105,10 +106,11 @@ class AppTheme {
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Colors.white,
         selectedItemColor: _primaryLight,
-        unselectedItemColor: Color(0xFF6B7280), // Gray-500
+        unselectedItemColor: Color(0xFF6B7280),
         selectedLabelStyle: TextStyle(fontSize: 12),
         unselectedLabelStyle: TextStyle(fontSize: 12),
       ),
+      scaffoldBackgroundColor: _backgroundLight,
     );
   }
 
@@ -131,13 +133,38 @@ class AppTheme {
       cardTheme: CardTheme(
         color: _surfaceDark,
         elevation: 1,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: _borderDark),
+        ),
       ),
       appBarTheme: const AppBarTheme(
         backgroundColor: Color(0xFF1F2937), // Dark background
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: false,
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _primaryDark,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24), // Rounded button style
+          ),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: _borderDark),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: _primaryDark, width: 2),
+        ),
+        filled: true,
+        fillColor: Color(0xFF374151), // Darker background for input fields
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: Color(0xFF1F2937),
@@ -146,6 +173,7 @@ class AppTheme {
         selectedLabelStyle: TextStyle(fontSize: 12),
         unselectedLabelStyle: TextStyle(fontSize: 12),
       ),
+      scaffoldBackgroundColor: _backgroundDark,
     );
   }
 
@@ -196,17 +224,5 @@ class AppTheme {
         labelSmall: themeData.textTheme.labelSmall?.copyWith(color: color),
       ),
     );
-  }
-
-  static Color getBorderColor(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light
-        ? _borderLight
-        : _borderDark;
-  }
-
-  static Color getBackgroundColor(BuildContext context) {
-    return Theme.of(context).brightness == Brightness.light
-        ? _backgroundLight
-        : _backgroundDark;
   }
 }
