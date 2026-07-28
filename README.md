@@ -8,14 +8,18 @@
 [![GitHub Repo stars](https://img.shields.io/github/stars/dhi13man/gotify_client?style=social)](https://github.com/Dhi13man/gotify_client/stargazers)
 [![Last Commit](https://img.shields.io/github/last-commit/dhi13man/gotify_client)](https://github.com/Dhi13man/gotify_client/commits/main)
 [![Build, Format, Test](https://github.com/Dhi13man/gotify_client/workflows/Build,%20Format,%20Test/badge.svg)](https://github.com/Dhi13man/gotify_client/actions)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Dhi13man/gotify_client/badge)](https://scorecard.dev/viewer/?uri=github.com/Dhi13man/gotify_client)
 
-[!["Buy Me A Coffee"](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20an%20Ego%20boost&emoji=%F0%9F%98%B3&slug=dhi13man&button_colour=FF5F5F&font_colour=ffffff&font_family=Lato&outline_colour=000000&coffee_colour=FFDD00****)](https://www.buymeacoffee.com/dhi13man)
+[!["Buy Me A Coffee"](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20an%20Ego%20boost&emoji=%F0%9F%98%B3&slug=dhi13man&button_colour=FF5F5F&font_colour=ffffff&font_family=Lato&outline_colour=000000&coffee_colour=FFDD00)](https://www.buymeacoffee.com/dhi13man)
 
 A minimal, cross-platform Gotify client UI built with Flutter.
 
 ## About
 
-This app provides a clean and intuitive cross-platform interface for [Gotify](https://gotify.net/) - a simple server for sending and receiving push notifications. It allows you to send, receive and manage notifications from your self-hosted Gotify server on Desktop, Android and iOS devices.
+This app provides a clean and intuitive cross-platform interface for
+[Gotify](https://gotify.net/) - a simple server for sending and receiving push
+notifications. It allows you to send, receive and manage notifications from your
+self-hosted Gotify server on Desktop, Android and iOS devices.
 
 ## Features
 
@@ -39,7 +43,7 @@ This app provides a clean and intuitive cross-platform interface for [Gotify](ht
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/yourusername/gotify_client.git
+   git clone https://github.com/Dhi13man/gotify_client.git
    cd gotify_client
    ```
 
@@ -64,23 +68,21 @@ This app provides a clean and intuitive cross-platform interface for [Gotify](ht
 ## Dependencies
 
 - Flutter
-- http: ^0.13.5
+- http: ^1.3.0
 - provider: ^6.0.5
 - shared_preferences: ^2.1.0
-- flutter_secure_storage: ^8.0.0
-- flutter_local_notifications: ^14.1.0
+- flutter_secure_storage: ^9.2.4
+- flutter_local_notifications: ^19.0.0
 - web_socket_channel: ^3.0.2
 - intl: ^0.18.0
 - logging: ^1.3.0
 
-## Screenshots
-
-- *Coming soon*
-
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
+Contributions are welcome! Please feel free to submit a Pull Request. See
+[CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
+for details.
