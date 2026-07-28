@@ -1,259 +1,257 @@
 import 'dart:convert';
+
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gotify_client/clients/gotify_client.dart';
 import 'package:gotify_client/models/auth_models.dart';
 import 'package:gotify_client/services/auth_service.dart';
-import 'package:http/http.dart' as http;
 import 'package:mocktail/mocktail.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class MockFlutterSecureStorage extends Mock implements FlutterSecureStorage {}
 
-class MockClient extends Mock implements http.Client {}
-
-class MockResponse extends Mock implements http.Response {}
-
-class MockSharedPreferences extends Mock implements SharedPreferences {}
+class MockGotifyClient extends Mock implements GotifyClient {}
 
 void main() {
   late AuthService authService;
   late MockFlutterSecureStorage mockSecureStorage;
-  late MockClient mockClient;
+  late MockGotifyClient mockClient;
+  late List<String> requestedServerUrls;
 
   const String serverUrl = 'https://gotify.example.com';
   const String validToken = 'valid_token';
   const String username = 'testuser';
   const String password = 'testpass';
-  const String clientEndpoint = '/client';
-  const String applicationEndpoint = '/application';
-
-  setUpAll(() {
-    registerFallbackValue(Uri());
-  });
 
   setUp(() {
     mockSecureStorage = MockFlutterSecureStorage();
-    mockClient = MockClient();
-
-    authService = AuthService(secureStorage: mockSecureStorage);
-
-    // Reset SharedPreferences
-    SharedPreferences.setMockInitialValues({});
+    mockClient = MockGotifyClient();
+    requestedServerUrls = <String>[];
+    authService = AuthService(
+      secureStorage: mockSecureStorage,
+      clientFactory: (String requestedServerUrl) {
+        requestedServerUrls.add(requestedServerUrl);
+        return mockClient;
+      },
+    );
+    SharedPreferences.setMockInitialValues(<String, Object>{});
   });
 
-  group('loadAuth', () {
-    test('should return initial state when no data is stored', () async {
+  group('AuthService', () {
+    test('loadAuth_whenNoDataIsStored_thenReturnsInitialState', () async {
       // Arrange
-      SharedPreferences.setMockInitialValues({});
-      when(() => mockSecureStorage.read(key: any(named: 'key')))
-          .thenAnswer((_) async => null);
+      SharedPreferences.setMockInitialValues(<String, Object>{});
 
       // Act
-      final result = await authService.loadAuth();
+      final AuthState result = await authService.loadAuth();
 
       // Assert
-      expect(result.isAuthenticated, false);
-      expect(result.serverUrl, '');
-      expect(result.token, isNull);
-      expect(result.error, isNull);
+      expect(result, AuthState.initial());
+      expect(requestedServerUrls, isEmpty);
+      verifyNever(() => mockSecureStorage.read(key: any(named: 'key')));
     });
 
-    test('should load auth state from storage', () async {
+    test(
+      'loadAuth_whenStoredCredentialsAreValid_thenReturnsAuthenticatedState',
+      () async {
+        // Arrange
+        SharedPreferences.setMockInitialValues(<String, Object>{
+          'gotify_auth': jsonEncode(<String, Object>{
+            'isAuthenticated': true,
+            'serverUrl': serverUrl,
+          }),
+        });
+        when(
+          () => mockSecureStorage.read(key: 'gotify_token'),
+        ).thenAnswer((_) async => validToken);
+        when(
+          () => mockClient.verifyToken(validToken),
+        ).thenAnswer((_) async => true);
+
+        // Act
+        final AuthState result = await authService.loadAuth();
+        await Future<void>.delayed(Duration.zero);
+
+        // Assert
+        expect(result, AuthState.authenticated(serverUrl, validToken));
+        expect(requestedServerUrls, <String>[serverUrl]);
+        verify(() => mockClient.verifyToken(validToken)).called(1);
+      },
+    );
+
+    test('loadAuth_whenTokenIsMissing_thenReturnsInitialState', () async {
       // Arrange
-      SharedPreferences.setMockInitialValues({
-        'gotify_auth': jsonEncode({
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'gotify_auth': jsonEncode(<String, Object>{
           'isAuthenticated': true,
           'serverUrl': serverUrl,
         }),
       });
-
-      when(() => mockSecureStorage.read(key: 'gotify_token'))
-          .thenAnswer((_) async => validToken);
-
-      // Act
-      final result = await authService.loadAuth();
-
-      // Assert
-      expect(result.isAuthenticated, true);
-      expect(result.serverUrl, serverUrl);
-      expect(result.token, validToken);
-      expect(result.error, isNull);
-    });
-
-    test('should return unauthenticated state when token is missing', () async {
-      // Arrange
-      SharedPreferences.setMockInitialValues({
-        'gotify_auth': jsonEncode({
-          'isAuthenticated': true,
-          'serverUrl': serverUrl,
-        }),
-      });
-
-      when(() => mockSecureStorage.read(key: 'gotify_token'))
-          .thenAnswer((_) async => null);
+      when(
+        () => mockSecureStorage.read(key: 'gotify_token'),
+      ).thenAnswer((_) async => null);
 
       // Act
-      final result = await authService.loadAuth();
+      final AuthState result = await authService.loadAuth();
 
       // Assert
-      expect(result.isAuthenticated, false);
-      expect(result.serverUrl, serverUrl);
-      expect(result.token, isNull);
-      expect(result.error, isNull);
-    });
-  });
-
-  group('login', () {
-    test('should authenticate with client token', () async {
-      // Arrange
-      final config = AuthConfig(
-        serverUrl: serverUrl,
-        clientToken: validToken,
-      );
-
-      final mockResponse = MockResponse();
-      when(() => mockResponse.statusCode).thenReturn(200);
-      when(() => mockResponse.body).thenReturn('[]');
-
-      when(() => mockClient.get(
-            Uri.parse('$serverUrl$applicationEndpoint'),
-            headers: any(named: 'headers'),
-          )).thenAnswer((_) async => mockResponse);
-
-      // Mock secure storage and shared preferences
-      when(() => mockSecureStorage.write(
-          key: any(named: 'key'),
-          value: any(named: 'value'))).thenAnswer((_) async {});
-
-      // Act
-      final result = await authService.login(config);
-
-      // Assert
-      expect(result.isAuthenticated, true);
-      expect(result.serverUrl, serverUrl);
-      expect(result.token, validToken);
-      expect(result.error, isNull);
-
-      verify(() =>
-              mockSecureStorage.write(key: 'gotify_token', value: validToken))
-          .called(1);
+      expect(result, AuthState.initial());
+      expect(requestedServerUrls, isEmpty);
+      verifyNever(() => mockClient.verifyToken(any()));
     });
 
-    test('should authenticate with username/password', () async {
-      // Arrange
-      final config = AuthConfig(
-        serverUrl: serverUrl,
-        username: username,
-        password: password,
-      );
+    test(
+      'login_whenClientTokenIsValid_thenAuthenticatesAndPersistsToken',
+      () async {
+        // Arrange
+        const AuthConfig config = AuthConfig(
+          serverUrl: serverUrl,
+          clientToken: validToken,
+        );
+        when(
+          () => mockClient.verifyToken(validToken),
+        ).thenAnswer((_) async => true);
+        when(
+          () => mockSecureStorage.write(
+            key: any(named: 'key'),
+            value: any(named: 'value'),
+          ),
+        ).thenAnswer((_) async {});
 
-      // Create client response
-      final clientResponse = MockResponse();
-      when(() => clientResponse.statusCode).thenReturn(200);
-      when(() => clientResponse.body)
-          .thenReturn(jsonEncode({'token': validToken}));
+        // Act
+        final AuthState result = await authService.login(config);
 
-      // Verification response
-      final verifyResponse = MockResponse();
-      when(() => verifyResponse.statusCode).thenReturn(200);
-      when(() => verifyResponse.body).thenReturn('[]');
+        // Assert
+        expect(result, AuthState.authenticated(serverUrl, validToken));
+        expect(requestedServerUrls, <String>[serverUrl]);
+        verify(() => mockClient.verifyToken(validToken)).called(1);
+        verifyNever(() => mockClient.createClientToken(any(), any(), any()));
+        verify(
+          () => mockSecureStorage.write(key: 'gotify_token', value: validToken),
+        ).called(1);
+      },
+    );
 
-      // Mock client POST for getting token
-      when(() => mockClient.post(
-            Uri.parse('$serverUrl$clientEndpoint'),
-            body: any(named: 'body'),
-            headers: any(named: 'headers'),
-            encoding: any(named: 'encoding'),
-          )).thenAnswer((_) async => clientResponse);
+    test(
+      'login_whenCredentialsAreValid_thenCreatesClientAndAuthenticates',
+      () async {
+        // Arrange
+        const AuthConfig config = AuthConfig(
+          serverUrl: serverUrl,
+          username: username,
+          password: password,
+        );
+        when(
+          () => mockClient.createClientToken(
+            username,
+            password,
+            'Flutter Client',
+          ),
+        ).thenAnswer((_) async => validToken);
+        when(
+          () => mockClient.verifyToken(validToken),
+        ).thenAnswer((_) async => true);
+        when(
+          () => mockSecureStorage.write(
+            key: any(named: 'key'),
+            value: any(named: 'value'),
+          ),
+        ).thenAnswer((_) async {});
 
-      // Mock client GET for verification
-      when(() => mockClient.get(
-            Uri.parse('$serverUrl$applicationEndpoint'),
-            headers: any(named: 'headers'),
-          )).thenAnswer((_) async => verifyResponse);
+        // Act
+        final AuthState result = await authService.login(config);
 
-      // Mock secure storage
-      when(() => mockSecureStorage.write(
-          key: any(named: 'key'),
-          value: any(named: 'value'))).thenAnswer((_) async {});
+        // Assert
+        expect(result, AuthState.authenticated(serverUrl, validToken));
+        expect(requestedServerUrls, <String>[serverUrl]);
+        verifyInOrder(<void Function()>[
+          () => mockClient.createClientToken(
+                username,
+                password,
+                'Flutter Client',
+              ),
+          () => mockClient.verifyToken(validToken),
+        ]);
+        verify(
+          () => mockSecureStorage.write(key: 'gotify_token', value: validToken),
+        ).called(1);
+      },
+    );
 
-      // Act
-      final result = await authService.login(config);
+    test(
+      'login_whenServerUrlIsInvalid_thenReturnsValidationErrorWithoutClient',
+      () async {
+        // Arrange
+        const AuthConfig config = AuthConfig(
+          serverUrl: 'invalid-url',
+          clientToken: validToken,
+        );
 
-      // Assert
-      expect(result.isAuthenticated, true);
-      expect(result.serverUrl, serverUrl);
-      expect(result.token, validToken);
-      expect(result.error, isNull);
+        // Act
+        final AuthState result = await authService.login(config);
 
-      verify(() =>
-              mockSecureStorage.write(key: 'gotify_token', value: validToken))
-          .called(1);
-    });
+        // Assert
+        expect(result.isAuthenticated, isFalse);
+        expect(result.serverUrl, 'invalid-url');
+        expect(result.error, 'Server URL cannot be empty');
+        expect(requestedServerUrls, isEmpty);
+        verifyNever(() => mockClient.verifyToken(any()));
+      },
+    );
 
-    test('should handle invalid server URL', () async {
-      // Arrange
-      final config = AuthConfig(
-        serverUrl: 'invalid-url',
-        clientToken: validToken,
-      );
+    test(
+      'login_whenTokenVerificationFails_thenReturnsVerificationError',
+      () async {
+        // Arrange
+        const AuthConfig config = AuthConfig(
+          serverUrl: serverUrl,
+          clientToken: 'invalid_token',
+        );
+        when(
+          () => mockClient.verifyToken('invalid_token'),
+        ).thenAnswer((_) async => false);
 
-      // Act
-      final result = await authService.login(config);
+        // Act
+        final AuthState result = await authService.login(config);
 
-      // Assert
-      expect(result.isAuthenticated, false);
-      expect(result.error, contains('Invalid'));
-      verifyNever(() => mockClient.get(any(), headers: any(named: 'headers')));
-    });
+        // Assert
+        expect(result.isAuthenticated, isFalse);
+        expect(result.serverUrl, serverUrl);
+        expect(result.error, 'Token verification failed');
+        expect(requestedServerUrls, <String>[serverUrl]);
+        verify(() => mockClient.verifyToken('invalid_token')).called(1);
+        verifyNever(
+          () => mockSecureStorage.write(
+            key: any(named: 'key'),
+            value: any(named: 'value'),
+          ),
+        );
+      },
+    );
 
-    test('should handle authentication failure', () async {
-      // Arrange
-      final config = AuthConfig(
-        serverUrl: serverUrl,
-        clientToken: 'invalid_token',
-      );
+    test(
+      'logout_whenCredentialsAreStored_thenClearsAuthenticationData',
+      () async {
+        // Arrange
+        when(
+          () => mockSecureStorage.delete(key: any(named: 'key')),
+        ).thenAnswer((_) async {});
+        SharedPreferences.setMockInitialValues(<String, Object>{
+          'gotify_auth': jsonEncode(<String, Object>{
+            'isAuthenticated': true,
+            'serverUrl': serverUrl,
+          }),
+        });
 
-      final mockResponse = MockResponse();
-      when(() => mockResponse.statusCode).thenReturn(401);
-      when(() => mockResponse.body)
-          .thenReturn(jsonEncode({'error': 'Invalid token'}));
-      when(() => mockResponse.reasonPhrase).thenReturn('Unauthorized');
+        // Act
+        await authService.logout();
 
-      when(() => mockClient.get(
-            Uri.parse('$serverUrl$applicationEndpoint'),
-            headers: any(named: 'headers'),
-          )).thenAnswer((_) async => mockResponse);
-
-      // Act
-      final result = await authService.login(config);
-
-      // Assert
-      expect(result.isAuthenticated, false);
-      expect(result.error, contains('Invalid token'));
-    });
-  });
-
-  group('logout', () {
-    test('should clear stored authentication data', () async {
-      // Arrange
-      when(() => mockSecureStorage.delete(key: any(named: 'key')))
-          .thenAnswer((_) async {});
-
-      SharedPreferences.setMockInitialValues({
-        'gotify_auth': jsonEncode({
-          'isAuthenticated': true,
-          'serverUrl': serverUrl,
-        }),
-      });
-
-      // Act
-      await authService.logout();
-
-      // Assert
-      verify(() => mockSecureStorage.delete(key: 'gotify_token')).called(1);
-      final prefs = await SharedPreferences.getInstance();
-      expect(prefs.getString('gotify_auth'), null);
-    });
+        // Assert
+        verify(() => mockSecureStorage.delete(key: 'gotify_token')).called(1);
+        final SharedPreferences preferences =
+            await SharedPreferences.getInstance();
+        expect(preferences.getString('gotify_auth'), isNull);
+      },
+    );
   });
 }

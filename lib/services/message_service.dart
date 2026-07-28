@@ -22,9 +22,9 @@ class MessageService {
   Function(Message)? _onMessageCallback;
   final Logger _logger = Logger('MessageService');
 
-  /// Creates a new MessageService with the given AuthState
-  MessageService(this._authState)
-      : _client = ClientFactory.getClient(_authState.serverUrl) {
+  /// Creates a message service, using [client] when one is provided.
+  MessageService(this._authState, {GotifyClient? client})
+      : _client = client ?? ClientFactory.getClient(_authState.serverUrl) {
     _validateAuthentication();
   }
 
