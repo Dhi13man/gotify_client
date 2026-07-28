@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:gotify_client/clients/client_factory.dart';
 import 'package:gotify_client/clients/gotify_client.dart';
 import 'package:gotify_client/models/auth_models.dart';
 import 'package:gotify_client/models/exceptions.dart';
@@ -34,6 +35,7 @@ void main() {
   tearDown(() async {
     messageService.disconnect();
     await messageStreamController.close();
+    await ClientFactory.clearClients();
   });
 
   group('MessageService', () {
@@ -41,11 +43,14 @@ void main() {
         'constructor_whenAuthStateIsUnauthenticated_'
         'thenThrowsAuthenticationException', () {
       // Arrange
-      final AuthState authState = AuthState.initial();
+      const AuthState authState = AuthState(
+        serverUrl: serverUrl,
+        token: authToken,
+        isAuthenticated: false,
+      );
 
       // Act
-      final void Function() constructService =
-          () => MessageService(authState, client: mockClient);
+      final void Function() constructService = () => MessageService(authState);
 
       // Assert
       expect(

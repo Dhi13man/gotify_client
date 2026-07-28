@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gotify_client/clients/gotify_client.dart';
 import 'package:gotify_client/models/auth_models.dart';
+import 'package:gotify_client/models/exceptions.dart';
 import 'package:gotify_client/services/auth_service.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -76,6 +78,82 @@ void main() {
         expect(result, AuthState.authenticated(serverUrl, validToken));
         expect(requestedServerUrls, <String>[serverUrl]);
         verify(() => mockClient.verifyToken(validToken)).called(1);
+      },
+    );
+
+    test(
+      'loadAuth_whenSilentVerificationRejectsToken_'
+      'thenReturnsStoredStateAndClearsCredentials',
+      () async {
+        // Arrange
+        final Completer<void> tokenDeleted = Completer<void>();
+        SharedPreferences.setMockInitialValues(<String, Object>{
+          'gotify_auth': jsonEncode(<String, Object>{
+            'isAuthenticated': true,
+            'serverUrl': serverUrl,
+          }),
+        });
+        when(
+          () => mockSecureStorage.read(key: 'gotify_token'),
+        ).thenAnswer((_) async => validToken);
+        when(
+          () => mockClient.verifyToken(validToken),
+        ).thenAnswer((_) async => false);
+        when(
+          () => mockSecureStorage.delete(key: 'gotify_token'),
+        ).thenAnswer((_) async => tokenDeleted.complete());
+
+        // Act
+        final AuthState result = await authService.loadAuth();
+        await tokenDeleted.future;
+        await Future<void>.delayed(Duration.zero);
+
+        // Assert
+        expect(result, AuthState.authenticated(serverUrl, validToken));
+        expect(requestedServerUrls, <String>[serverUrl]);
+        verify(() => mockClient.verifyToken(validToken)).called(1);
+        verify(
+          () => mockSecureStorage.delete(key: 'gotify_token'),
+        ).called(1);
+        final SharedPreferences preferences =
+            await SharedPreferences.getInstance();
+        expect(preferences.getString('gotify_auth'), isNull);
+      },
+    );
+
+    test(
+      'loadAuth_whenSilentVerificationThrows_'
+      'thenReturnsStoredStateWithoutClearingCredentials',
+      () async {
+        // Arrange
+        final String storedAuth = jsonEncode(<String, Object>{
+          'isAuthenticated': true,
+          'serverUrl': serverUrl,
+        });
+        SharedPreferences.setMockInitialValues(<String, Object>{
+          'gotify_auth': storedAuth,
+        });
+        when(
+          () => mockSecureStorage.read(key: 'gotify_token'),
+        ).thenAnswer((_) async => validToken);
+        when(
+          () => mockClient.verifyToken(validToken),
+        ).thenThrow(const ClientNetworkException('Server unavailable'));
+
+        // Act
+        final AuthState result = await authService.loadAuth();
+        await Future<void>.delayed(Duration.zero);
+
+        // Assert
+        expect(result, AuthState.authenticated(serverUrl, validToken));
+        expect(requestedServerUrls, <String>[serverUrl]);
+        verify(() => mockClient.verifyToken(validToken)).called(1);
+        verifyNever(
+          () => mockSecureStorage.delete(key: any(named: 'key')),
+        );
+        final SharedPreferences preferences =
+            await SharedPreferences.getInstance();
+        expect(preferences.getString('gotify_auth'), storedAuth);
       },
     );
 
