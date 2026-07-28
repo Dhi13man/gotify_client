@@ -43,3 +43,34 @@ jobs:
       # Run tests without exposing sensitive information.
       - name: Run tests
         run: flutter test --coverage
+
+  build_macos:
+    runs-on: macos-14
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: '3.27.0'
+          channel: 'stable'
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Configure macOS build
+        run: flutter build macos --debug --config-only --no-pub
+
+      - name: Build macOS app
+        run: |
+          xcodebuild \
+            -workspace macos/Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Debug \
+            -derivedDataPath build/macos \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
