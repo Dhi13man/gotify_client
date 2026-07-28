@@ -42,7 +42,8 @@ class AuthConfig {
   }
 
   @override
-  String toString() => 'AuthConfig(serverUrl: $serverUrl, '
+  String toString() =>
+      'AuthConfig(serverUrl: $serverUrl, '
       'username: ${username != null ? '***' : 'null'}, '
       'password: ${password != null ? '***' : 'null'}, '
       'clientToken: ${clientToken != null ? '***' : 'null'})';
@@ -127,7 +128,8 @@ class AuthState {
   }
 
   @override
-  String toString() => 'AuthState('
+  String toString() =>
+      'AuthState('
       'isAuthenticated: $isAuthenticated, '
       'serverUrl: $serverUrl, '
       'clientToken: ${token != null ? '***' : 'null'}, '

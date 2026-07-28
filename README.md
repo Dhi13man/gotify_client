@@ -27,7 +27,7 @@ self-hosted Gotify server.
 
 ### Prerequisites
 
-- Flutter SDK (>=3.27.0, with Dart >=3.6.0)
+- Flutter SDK (>=3.38.1, with Dart >=3.10.0)
 - Xcode with macOS development tools
 - A running Gotify server instance
 

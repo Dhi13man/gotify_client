@@ -67,8 +67,10 @@ class HomeWrapperState extends State<HomeWrapper> {
 
     // Initialize the message provider with auth data
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<MessageProvider>(context, listen: false)
-          .initialize(authProvider.authState);
+      Provider.of<MessageProvider>(
+        context,
+        listen: false,
+      ).initialize(authProvider.authState);
     });
 
     return AppScaffold(

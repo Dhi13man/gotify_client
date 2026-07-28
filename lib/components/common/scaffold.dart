@@ -36,7 +36,7 @@ class AppScaffold extends StatelessWidget {
               Provider.of<AuthProvider>(context, listen: false).logout();
               Navigator.of(context).pushReplacementNamed('/login');
             },
-          )
+          ),
         ],
         elevation: 0,
       ),

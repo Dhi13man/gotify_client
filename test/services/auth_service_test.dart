@@ -244,10 +244,10 @@ void main() {
         expect(requestedServerUrls, <String>[serverUrl]);
         verifyInOrder(<void Function()>[
           () => mockClient.createClientToken(
-                username,
-                password,
-                'Flutter Client',
-              ),
+            username,
+            password,
+            'Flutter Client',
+          ),
           () => mockClient.verifyToken(validToken),
         ]);
         verify(

@@ -49,8 +49,8 @@ class GotifyHttpClient implements GotifyClient {
 
   /// Creates a new HTTP client instance for the specified server
   GotifyHttpClient(String serverUrl, {http.Client? httpClient})
-      : _serverUrl = _normalizeUrl(serverUrl),
-        _httpClient = httpClient ?? http.Client();
+    : _serverUrl = _normalizeUrl(serverUrl),
+      _httpClient = httpClient ?? http.Client();
 
   @override
   String get serverUrl => _serverUrl;
@@ -86,8 +86,9 @@ class GotifyHttpClient implements GotifyClient {
   // Helper method to build authentication headers
   Map<String, String> _buildAuthHeaders() {
     if (_authType == AuthType.basic && _username != null && _password != null) {
-      final String credentials =
-          base64Encode(utf8.encode('$_username:$_password'));
+      final String credentials = base64Encode(
+        utf8.encode('$_username:$_password'),
+      );
       return {_authHeader: 'Basic $credentials'};
     } else if (_token != null) {
       // Support both authorization methods for token
@@ -313,7 +314,8 @@ class GotifyHttpClient implements GotifyClient {
     } on FormatException {
       _logger.warning('Invalid JSON response from server: $responseBody');
       throw const ClientFormatException(
-          'Server returned invalid response format');
+        'Server returned invalid response format',
+      );
     }
   }
 
@@ -369,7 +371,8 @@ class GotifyHttpClient implements GotifyClient {
   }) async {
     if (_authType != AuthType.appToken) {
       throw const ClientAuthenticationException(
-          'Creating messages requires an application token');
+        'Creating messages requires an application token',
+      );
     }
 
     final Map<String, dynamic> body = {
@@ -402,7 +405,8 @@ class GotifyHttpClient implements GotifyClient {
   Stream<Message> streamMessages() {
     if (_token == null) {
       throw const ClientAuthenticationException(
-          'Authentication token is required for streaming messages');
+        'Authentication token is required for streaming messages',
+      );
     }
 
     final wsUrl = _serverUrl.replaceFirst(RegExp(r'^http'), 'ws');
@@ -422,7 +426,8 @@ class GotifyHttpClient implements GotifyClient {
         } catch (e, stackTrace) {
           _logger.warning('Error parsing WebSocket message', e, stackTrace);
           throw ClientFormatException(
-              'Invalid message format: ${e.toString()}');
+            'Invalid message format: ${e.toString()}',
+          );
         }
       } else {
         throw const ClientFormatException('Unexpected WebSocket data format');
@@ -438,7 +443,8 @@ class GotifyHttpClient implements GotifyClient {
 
     if (data is! List) {
       throw const ClientFormatException(
-          'Expected applications list but got different format');
+        'Expected applications list but got different format',
+      );
     }
 
     return data
@@ -487,7 +493,9 @@ class GotifyHttpClient implements GotifyClient {
 
   @override
   Future<Application> uploadApplicationImage(
-      int appId, Uint8List imageData) async {
+    int appId,
+    Uint8List imageData,
+  ) async {
     return _executeRequest(() async {
       final uri = Uri.parse('$_serverUrl$_applicationEndpoint/$appId/image');
 
@@ -498,11 +506,13 @@ class GotifyHttpClient implements GotifyClient {
       request.headers.addAll(_buildAuthHeaders());
 
       // Add the file
-      request.files.add(http.MultipartFile.fromBytes(
-        'file',
-        imageData,
-        filename: 'image.png', // Default filename
-      ));
+      request.files.add(
+        http.MultipartFile.fromBytes(
+          'file',
+          imageData,
+          filename: 'image.png', // Default filename
+        ),
+      );
 
       // Send the request
       final streamedResponse = await request.send();
@@ -513,7 +523,9 @@ class GotifyHttpClient implements GotifyClient {
       }
 
       final data = _parseJsonResponse(
-          response.body, '$_applicationEndpoint/$appId/image');
+        response.body,
+        '$_applicationEndpoint/$appId/image',
+      );
       return Application.fromJson(data);
     }, '$_applicationEndpoint/$appId/image');
   }
@@ -531,7 +543,8 @@ class GotifyHttpClient implements GotifyClient {
 
     if (data is! List) {
       throw const ClientFormatException(
-          'Expected clients list but got different format');
+        'Expected clients list but got different format',
+      );
     }
 
     return data
@@ -565,7 +578,8 @@ class GotifyHttpClient implements GotifyClient {
 
     if (data is! List) {
       throw const ClientFormatException(
-          'Expected users list but got different format');
+        'Expected users list but got different format',
+      );
     }
 
     return data
@@ -592,11 +606,14 @@ class GotifyHttpClient implements GotifyClient {
     required String password,
     required bool admin,
   }) async {
-    final data = await _post(_userEndpoint, body: {
-      'name': name,
-      'pass': password,
-      'admin': admin,
-    });
+    final data = await _post(
+      _userEndpoint,
+      body: {
+        'name': name,
+        'pass': password,
+        'admin': admin,
+      },
+    );
     return User.fromJson(data);
   }
 
@@ -638,7 +655,8 @@ class GotifyHttpClient implements GotifyClient {
 
     if (data is! List) {
       throw const ClientFormatException(
-          'Expected plugins list but got different format');
+        'Expected plugins list but got different format',
+      );
     }
 
     return data
@@ -659,7 +677,8 @@ class GotifyHttpClient implements GotifyClient {
       return data['data'];
     } else {
       throw const ClientFormatException(
-          'Expected string data from plugin display endpoint');
+        'Expected string data from plugin display endpoint',
+      );
     }
   }
 

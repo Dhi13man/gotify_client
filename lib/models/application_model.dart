@@ -46,8 +46,9 @@ class Application {
       internal: json['internal'],
       image: json['image'],
       defaultPriority: json['defaultPriority'],
-      lastUsed:
-          json['lastUsed'] != null ? DateTime.parse(json['lastUsed']) : null,
+      lastUsed: json['lastUsed'] != null
+          ? DateTime.parse(json['lastUsed'])
+          : null,
     );
   }
 

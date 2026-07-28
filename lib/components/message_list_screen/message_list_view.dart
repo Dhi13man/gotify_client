@@ -25,10 +25,12 @@ class MessageListView extends StatelessWidget {
           for (final entry in groupedMessages.entries) ...[
             DateHeader(title: entry.key),
             const SizedBox(height: 8),
-            ...entry.value.map((message) => MessageCard(
-                  message: message,
-                  onDeletePressed: onDeletePressed,
-                )),
+            ...entry.value.map(
+              (message) => MessageCard(
+                message: message,
+                onDeletePressed: onDeletePressed,
+              ),
+            ),
             const SizedBox(height: 16),
           ],
         ],

@@ -76,7 +76,7 @@ class SendMessageScreenState extends State<SendMessageScreen> {
   void _showErrorMessage() {
     final errorMessage =
         Provider.of<MessageProvider>(context, listen: false).error ??
-            'Failed to send message';
+        'Failed to send message';
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(errorMessage),

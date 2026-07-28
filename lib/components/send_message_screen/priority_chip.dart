@@ -17,8 +17,10 @@ class PriorityChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final Color priorityColor =
-        AppTheme.getPriorityColor(context, priority.numericValue);
+    final Color priorityColor = AppTheme.getPriorityColor(
+      context,
+      priority.numericValue,
+    );
 
     return GestureDetector(
       onTap: onTap,

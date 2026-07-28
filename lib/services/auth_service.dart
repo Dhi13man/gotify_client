@@ -23,8 +23,8 @@ class AuthService {
   AuthService({
     FlutterSecureStorage? secureStorage,
     GotifyClient Function(String serverUrl)? clientFactory,
-  })  : _secureStorage = secureStorage ?? const FlutterSecureStorage(),
-        _clientFactory = clientFactory ?? ClientFactory.getClient;
+  }) : _secureStorage = secureStorage ?? const FlutterSecureStorage(),
+       _clientFactory = clientFactory ?? ClientFactory.getClient;
 
   /// Loads authentication state from secure storage
   Future<AuthState> loadAuth() async {
@@ -190,7 +190,8 @@ class AuthService {
       if (!isValid) {
         // Token is no longer valid, clear stored auth data
         _logger.info(
-            'Stored token is no longer valid, clearing authentication data');
+          'Stored token is no longer valid, clearing authentication data',
+        );
         await logout();
       }
     } catch (e) {
@@ -223,7 +224,8 @@ class AuthService {
     } catch (e, stackTrace) {
       _logger.severe('Error saving auth data', e, stackTrace);
       throw ClientException(
-          'Failed to save authentication data: ${e.toString()}');
+        'Failed to save authentication data: ${e.toString()}',
+      );
     }
   }
 }
