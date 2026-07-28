@@ -67,9 +67,6 @@ ios/**/build/
 # macOS
 macos/.swiftpm/
 macos/Flutter/GeneratedPluginRegistrant.swift
-macos/Flutter/Flutter-Debug.xcconfig
-macos/Flutter/Flutter-Release.xcconfig
-macos/Flutter/Flutter-Profile.xcconfig
 macos/Flutter/Ephemeral/
 macos/Runner/Assets.xcassets/
 macos/Runner/DerivedData/
