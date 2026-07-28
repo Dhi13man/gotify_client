@@ -421,8 +421,6 @@ class AppTheme {
         return isLightMode ? _priorityLowLight : _priorityLowDark;
       case PriorityType.min:
         return isLightMode ? _priorityMinLight : _priorityMinDark;
-      default:
-        return theme.colorScheme.primary;
     }
   }
 

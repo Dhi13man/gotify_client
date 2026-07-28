@@ -1,0 +1,58 @@
+name: Bug report
+description: Report a reproducible Gotify Client defect
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        Do not report security vulnerabilities here. Use the private reporting
+        form in the Security tab.
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      placeholder: App version or git commit
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Include the smallest sequence that reproduces the defect.
+      placeholder: |
+        1. Configure ...
+        2. Open ...
+        3. Observe ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior and logs
+      description: Redact server URLs, credentials, tokens, and message contents.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: macOS version, Flutter version, and Gotify server version.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Pre-flight checks
+      options:
+        - label: I reproduced this with the latest release or current `main`.
+          required: true
+        - label: I removed secrets and private data from this report.
+          required: true
