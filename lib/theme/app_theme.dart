@@ -62,7 +62,7 @@ class AppTheme {
         onError: Colors.white,
         tertiary: _accentLight,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 0.8, // More subtle elevation
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(
@@ -203,7 +203,7 @@ class AppTheme {
         color: _primaryLight,
         size: 24,
       ),
-      tabBarTheme: const TabBarTheme(
+      tabBarTheme: const TabBarThemeData(
         labelColor: _primaryLight,
         unselectedLabelColor: _textSecondaryLight,
         indicatorColor: _primaryLight,
@@ -216,7 +216,7 @@ class AppTheme {
           fontSize: 14,
         ),
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: _surfaceLight,
         elevation: 5,
         shape: RoundedRectangleBorder(
@@ -243,7 +243,7 @@ class AppTheme {
         onError: _primaryContentDark,
         tertiary: _accentDark,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 0.8,
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(
@@ -382,7 +382,7 @@ class AppTheme {
         color: _primaryDark,
         size: 24,
       ),
-      tabBarTheme: const TabBarTheme(
+      tabBarTheme: const TabBarThemeData(
         labelColor: _primaryDark,
         unselectedLabelColor: _textSecondaryDark,
         indicatorColor: _primaryDark,
@@ -395,7 +395,7 @@ class AppTheme {
           fontSize: 14,
         ),
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: _surfaceDark,
         elevation: 5,
         shape: RoundedRectangleBorder(
