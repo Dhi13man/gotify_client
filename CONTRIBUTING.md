@@ -10,7 +10,7 @@ API before contributing!
 ## General Steps to Contribute
 
 1. Ensure you have
-   [Flutter SDK (>=2.19.0)](https://flutter.dev/docs/get-started/install/)
+   [Flutter SDK (>=3.24.0)](https://flutter.dev/docs/get-started/install/)
    installed.
 
 2. Fork the [project repository](https://github.com/dhi13man/gotify_client/).
@@ -46,10 +46,11 @@ API before contributing!
     flutter analyze
     ```
 
-11. Commit your changes and push them to your local repository:
+11. Stage and commit your changes, then push them to your fork:
 
     ```sh
-    git commit -am "your descriptive commit message"
+    git add .
+    git commit -m "your descriptive commit message"
     git push origin <new-branch-name>
     ```
 

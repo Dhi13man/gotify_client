@@ -16,14 +16,6 @@ body:
       placeholder: App version or git commit
     validations:
       required: true
-  - type: dropdown
-    id: platform
-    attributes:
-      label: Platform
-      options:
-        - macOS
-    validations:
-      required: true
   - type: textarea
     id: reproduction
     attributes:
