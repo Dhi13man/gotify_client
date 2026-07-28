@@ -32,9 +32,9 @@ class LocalNotificationService implements NotificationService {
   LocalNotificationService({
     FlutterLocalNotificationsPlugin? notificationsPlugin,
     Logger? logger,
-  })  : _notificationsPlugin =
-            notificationsPlugin ?? FlutterLocalNotificationsPlugin(),
-        _logger = logger ?? Logger('LocalNotificationService');
+  }) : _notificationsPlugin =
+           notificationsPlugin ?? FlutterLocalNotificationsPlugin(),
+       _logger = logger ?? Logger('LocalNotificationService');
 
   @override
   bool get isInitialized => _isInitialized;
@@ -54,10 +54,10 @@ class LocalNotificationService implements NotificationService {
 
       const DarwinInitializationSettings darwinSettings =
           DarwinInitializationSettings(
-        requestAlertPermission: true,
-        requestBadgePermission: true,
-        requestSoundPermission: true,
-      );
+            requestAlertPermission: true,
+            requestBadgePermission: true,
+            requestSoundPermission: true,
+          );
 
       const InitializationSettings initSettings = InitializationSettings(
         android: androidSettings,
@@ -65,7 +65,9 @@ class LocalNotificationService implements NotificationService {
         macOS: darwinSettings,
       );
 
-      final bool? success = await _notificationsPlugin.initialize(initSettings);
+      final bool? success = await _notificationsPlugin.initialize(
+        settings: initSettings,
+      );
 
       if (success ?? false) {
         _logger.info('Notification service initialized successfully');
@@ -109,10 +111,10 @@ class LocalNotificationService implements NotificationService {
       );
 
       await _notificationsPlugin.show(
-        id,
-        title,
-        body,
-        details,
+        id: id,
+        title: title,
+        body: body,
+        notificationDetails: details,
         payload: payload,
       );
       return true;

@@ -32,7 +32,7 @@ class MessageProvider extends ChangeNotifier {
   MessageProvider({
     MessageService? Function(AuthState)? messageServiceFactory,
   }) : _messageServiceFactory =
-            messageServiceFactory ?? ((authState) => MessageService(authState));
+           messageServiceFactory ?? ((authState) => MessageService(authState));
 
   /// Initializes the message service with authentication state
   void initialize(AuthState authState) {
@@ -111,7 +111,10 @@ class MessageProvider extends ChangeNotifier {
 
     // Input validation
     final validationError = _validateMessageInput(
-        title: title, message: message, priority: priority);
+      title: title,
+      message: message,
+      priority: priority,
+    );
 
     if (validationError != null) {
       _setError(validationError);

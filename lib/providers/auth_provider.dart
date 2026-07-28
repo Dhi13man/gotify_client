@@ -21,7 +21,7 @@ class AuthProvider extends ChangeNotifier {
 
   // Constructor with optional dependency injection for testability
   AuthProvider({AuthService? authService})
-      : _authService = authService ?? AuthService() {
+    : _authService = authService ?? AuthService() {
     _initAuth();
   }
 

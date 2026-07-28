@@ -26,8 +26,9 @@ class Client {
       id: json['id'],
       token: json['token'],
       name: json['name'],
-      lastUsed:
-          json['lastUsed'] != null ? DateTime.parse(json['lastUsed']) : null,
+      lastUsed: json['lastUsed'] != null
+          ? DateTime.parse(json['lastUsed'])
+          : null,
     );
   }
 

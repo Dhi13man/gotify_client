@@ -138,8 +138,10 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: _borderLight.withValues(alpha: 0.5), width: 1),
+          borderSide: BorderSide(
+            color: _borderLight.withValues(alpha: 0.5),
+            width: 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -248,8 +250,10 @@ class AppTheme {
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side:
-              BorderSide(color: _borderDark.withValues(alpha: 0.3), width: 0.5),
+          side: BorderSide(
+            color: _borderDark.withValues(alpha: 0.3),
+            width: 0.5,
+          ),
         ),
         color: _surfaceDark,
       ),
@@ -317,8 +321,10 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide:
-              BorderSide(color: _borderDark.withValues(alpha: 0.5), width: 1),
+          borderSide: BorderSide(
+            color: _borderDark.withValues(alpha: 0.5),
+            width: 1,
+          ),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

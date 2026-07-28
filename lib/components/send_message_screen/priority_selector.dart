@@ -33,8 +33,10 @@ class PrioritySelector extends StatelessWidget {
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: priorityColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(16),
@@ -57,14 +59,16 @@ class PrioritySelector extends StatelessWidget {
                   inactiveTrackColor: priorityColor.withValues(alpha: 0.2),
                   thumbColor: priorityColor,
                   trackHeight: 6,
-                  thumbShape:
-                      const RoundSliderThumbShape(enabledThumbRadius: 8),
+                  thumbShape: const RoundSliderThumbShape(
+                    enabledThumbRadius: 8,
+                  ),
                 ),
                 child: Slider(
                   value: priority.toDouble(),
                   min: PriorityType.min.numericValue.toDouble(),
                   max: PriorityType.max.numericValue.toDouble(),
-                  divisions: PriorityType.max.numericValue -
+                  divisions:
+                      PriorityType.max.numericValue -
                       PriorityType.min.numericValue,
                   label: priority.toString(),
                   onChanged: (double value) => onPriorityChanged(value.toInt()),
@@ -96,7 +100,7 @@ class PrioritySelector extends StatelessWidget {
               ),
             ],
           ),
-        )
+        ),
       ],
     );
   }

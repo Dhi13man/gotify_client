@@ -10,7 +10,7 @@ API before contributing!
 ## General Steps to Contribute
 
 1. Ensure you have
-   [Flutter SDK (>=3.27.0)](https://flutter.dev/docs/get-started/install/)
+   [Flutter SDK (>=3.38.1)](https://flutter.dev/docs/get-started/install/)
    installed.
 
 2. Fork the [project repository](https://github.com/dhi13man/gotify_client/).

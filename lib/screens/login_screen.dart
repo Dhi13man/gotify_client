@@ -39,10 +39,13 @@ class LoginScreenState extends State<LoginScreen> {
     final config = _createAuthConfig();
 
     // Store ScaffoldMessenger before the async gap
-    final ScaffoldMessengerState scaffoldMessenger =
-        ScaffoldMessenger.of(context);
-    final AuthProvider authProvider =
-        Provider.of<AuthProvider>(context, listen: false);
+    final ScaffoldMessengerState scaffoldMessenger = ScaffoldMessenger.of(
+      context,
+    );
+    final AuthProvider authProvider = Provider.of<AuthProvider>(
+      context,
+      listen: false,
+    );
 
     final success = await authProvider.login(config);
 

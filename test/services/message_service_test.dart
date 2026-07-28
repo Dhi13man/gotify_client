@@ -39,8 +39,7 @@ void main() {
   });
 
   group('MessageService', () {
-    test(
-        'constructor_whenAuthStateIsUnauthenticated_'
+    test('constructor_whenAuthStateIsUnauthenticated_'
         'thenThrowsAuthenticationException', () {
       // Arrange
       const AuthState authState = AuthState(
@@ -131,8 +130,7 @@ void main() {
       ]);
     });
 
-    test(
-        'getMessages_whenAuthenticationFails_'
+    test('getMessages_whenAuthenticationFails_'
         'thenPropagatesAuthenticationException', () async {
       // Arrange
       when(() => mockClient.getMessages()).thenThrow(
@@ -153,8 +151,7 @@ void main() {
       ]);
     });
 
-    test(
-        'getMessages_whenClientCannotParseResponse_'
+    test('getMessages_whenClientCannotParseResponse_'
         'thenPropagatesFormatException', () async {
       // Arrange
       when(
@@ -203,10 +200,10 @@ void main() {
       verifyInOrder(<void Function()>[
         () => mockClient.setToken('app_token', AuthType.appToken),
         () => mockClient.createMessage(
-              title: 'Test',
-              message: 'Hello World',
-              priority: 5,
-            ),
+          title: 'Test',
+          message: 'Hello World',
+          priority: 5,
+        ),
         () => mockClient.setToken(authToken, AuthType.clientToken),
       ]);
     });
@@ -238,10 +235,10 @@ void main() {
         verifyInOrder(<void Function()>[
           () => mockClient.setToken('app_token', AuthType.appToken),
           () => mockClient.createMessage(
-                title: 'Test',
-                message: 'Hello World',
-                priority: 5,
-              ),
+            title: 'Test',
+            message: 'Hello World',
+            priority: 5,
+          ),
           () => mockClient.setToken(authToken, AuthType.clientToken),
         ]);
       },

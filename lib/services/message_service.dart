@@ -24,7 +24,7 @@ class MessageService {
 
   /// Creates a message service, using [client] when one is provided.
   MessageService(this._authState, {GotifyClient? client})
-      : _client = client ?? ClientFactory.getClient(_authState.serverUrl) {
+    : _client = client ?? ClientFactory.getClient(_authState.serverUrl) {
     _validateAuthentication();
   }
 
@@ -99,14 +99,16 @@ class MessageService {
     _closeWebSocket();
 
     if (!_shouldReconnect || _reconnectAttempts >= maxReconnectAttempts) {
-      _logger
-          .warning('Max reconnect attempts reached or reconnection disabled');
+      _logger.warning(
+        'Max reconnect attempts reached or reconnection disabled',
+      );
       return;
     }
 
     _reconnectAttempts++;
-    _logger
-        .info('Reconnect attempt $_reconnectAttempts of $maxReconnectAttempts');
+    _logger.info(
+      'Reconnect attempt $_reconnectAttempts of $maxReconnectAttempts',
+    );
 
     Future.delayed(reconnectDelay, () {
       if (_shouldReconnect) {

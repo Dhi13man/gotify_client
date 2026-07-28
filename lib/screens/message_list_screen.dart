@@ -32,10 +32,13 @@ class MessageListScreenState extends State<MessageListScreen> {
 
   Future<void> _deleteMessage(Message message) async {
     // Store context objects before async operation
-    final ScaffoldMessengerState scaffoldMessenger =
-        ScaffoldMessenger.of(context);
-    final MessageProvider messageProvider =
-        Provider.of<MessageProvider>(context, listen: false);
+    final ScaffoldMessengerState scaffoldMessenger = ScaffoldMessenger.of(
+      context,
+    );
+    final MessageProvider messageProvider = Provider.of<MessageProvider>(
+      context,
+      listen: false,
+    );
 
     // First, optimistically remove the message from the local state
     messageProvider.removeMessageLocally(message.id);
@@ -58,12 +61,14 @@ class MessageListScreenState extends State<MessageListScreen> {
 
   Future<void> _showDeleteConfirmation(Message message) async {
     final ColorScheme colorScheme = Theme.of(context).colorScheme;
-    final bool confirmed = await showDialog<bool>(
+    final bool confirmed =
+        await showDialog<bool>(
           context: context,
           builder: (dialogContext) => AlertDialog(
             title: const Text('Delete Message'),
-            content:
-                const Text('Are you sure you want to delete this message?'),
+            content: const Text(
+              'Are you sure you want to delete this message?',
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -107,8 +112,11 @@ class MessageListScreenState extends State<MessageListScreen> {
     final DateTime yesterday = today.subtract(const Duration(days: 1));
 
     final DateTime localDate = date.toLocal();
-    final DateTime messageDate =
-        DateTime(localDate.year, localDate.month, localDate.day);
+    final DateTime messageDate = DateTime(
+      localDate.year,
+      localDate.month,
+      localDate.day,
+    );
     if (messageDate == today) {
       return 'Today';
     } else if (messageDate == yesterday) {
@@ -143,8 +151,10 @@ class MessageListScreenState extends State<MessageListScreen> {
                 );
               }
 
-              final filteredMessages =
-                  filterMessages(messageProvider.messages, _selectedFilter);
+              final filteredMessages = filterMessages(
+                messageProvider.messages,
+                _selectedFilter,
+              );
               final groupedMessages = _groupMessagesByDate(filteredMessages);
 
               if (groupedMessages.isEmpty) {

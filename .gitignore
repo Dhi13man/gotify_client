@@ -1,5 +1,6 @@
 # General
 *.lock
+!pubspec.lock
 *.log
 *.pyc
 *.swp
