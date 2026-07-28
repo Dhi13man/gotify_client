@@ -1,25 +1,18 @@
 # Gotify Client
 
 [![License](https://img.shields.io/github/license/dhi13man/gotify_client)](https://github.com/Dhi13man/gotify_client/blob/main/LICENSE)
-[![Language](https://img.shields.io/badge/language-Dart-blue.svg)](https://dart.dev)
 [![Language](https://img.shields.io/badge/language-Flutter-blue.svg)](https://flutter.dev)
-[![Contributors](https://img.shields.io/github/contributors-anon/dhi13man/gotify_client?style=flat)](https://github.com/Dhi13man/gotify_client/graphs/contributors)
-[![GitHub forks](https://img.shields.io/github/forks/dhi13man/gotify_client?style=social)](https://github.com/Dhi13man/gotify_client/network/members)
-[![GitHub Repo stars](https://img.shields.io/github/stars/dhi13man/gotify_client?style=social)](https://github.com/Dhi13man/gotify_client/stargazers)
-[![Last Commit](https://img.shields.io/github/last-commit/dhi13man/gotify_client)](https://github.com/Dhi13man/gotify_client/commits/main)
 [![Build, Format, Test](https://github.com/Dhi13man/gotify_client/workflows/Build,%20Format,%20Test/badge.svg)](https://github.com/Dhi13man/gotify_client/actions)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Dhi13man/gotify_client/badge)](https://scorecard.dev/viewer/?uri=github.com/Dhi13man/gotify_client)
 
-[!["Buy Me A Coffee"](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20an%20Ego%20boost&emoji=%F0%9F%98%B3&slug=dhi13man&button_colour=FF5F5F&font_colour=ffffff&font_family=Lato&outline_colour=000000&coffee_colour=FFDD00)](https://www.buymeacoffee.com/dhi13man)
-
-A minimal, cross-platform Gotify client UI built with Flutter.
+A minimal Gotify client UI for macOS, built with Flutter.
 
 ## About
 
-This app provides a clean and intuitive cross-platform interface for
+This app provides a clean and intuitive macOS interface for
 [Gotify](https://gotify.net/) - a simple server for sending and receiving push
 notifications. It allows you to send, receive and manage notifications from your
-self-hosted Gotify server on Desktop, Android and iOS devices.
+self-hosted Gotify server.
 
 ## Features
 
@@ -35,7 +28,7 @@ self-hosted Gotify server on Desktop, Android and iOS devices.
 ### Prerequisites
 
 - Flutter SDK (>=2.19.0)
-- Android SDK or Xcode (for iOS builds)
+- Xcode with macOS development tools
 - A running Gotify server instance
 
 ### Building from source
@@ -56,7 +49,7 @@ self-hosted Gotify server on Desktop, Android and iOS devices.
 3. Run the app:
 
    ```sh
-   flutter run
+   flutter run -d macos
    ```
 
 ## Usage
@@ -67,15 +60,8 @@ self-hosted Gotify server on Desktop, Android and iOS devices.
 
 ## Dependencies
 
-- Flutter
-- http: ^1.3.0
-- provider: ^6.0.5
-- shared_preferences: ^2.1.0
-- flutter_secure_storage: ^9.2.4
-- flutter_local_notifications: ^19.0.0
-- web_socket_channel: ^3.0.2
-- intl: ^0.18.0
-- logging: ^1.3.0
+See [pubspec.yaml](pubspec.yaml) for the current application and development
+dependency constraints.
 
 ## Contributing
 

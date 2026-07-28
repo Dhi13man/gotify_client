@@ -1,5 +1,5 @@
 name: gotify_client
-description: A beautiful Gotify client for mobile
+description: A Gotify client for macOS
 publish_to: 'none'
 version: 1.0.0+1
 

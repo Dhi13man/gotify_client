@@ -9,7 +9,7 @@ Describe the problem and the smallest change that solves it.
 - [ ] `dart format --output=none --set-exit-if-changed .`
 - [ ] `flutter analyze`
 - [ ] `flutter test --coverage`
-- [ ] Relevant UI changes were exercised on a supported device or simulator
+- [ ] Relevant UI changes were exercised on macOS
 - [ ] No credentials, server URLs, tokens, or private message data are included
 
 ## Scope
