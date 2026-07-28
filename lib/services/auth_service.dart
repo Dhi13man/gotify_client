@@ -17,10 +17,14 @@ class AuthService {
   static final _logger = Logger('AuthService');
 
   final FlutterSecureStorage _secureStorage;
+  final GotifyClient Function(String serverUrl) _clientFactory;
 
-  /// Creates a new AuthService with the given secure storage
-  AuthService({FlutterSecureStorage? secureStorage})
-      : _secureStorage = secureStorage ?? const FlutterSecureStorage();
+  /// Creates an auth service with optional storage and client dependencies.
+  AuthService({
+    FlutterSecureStorage? secureStorage,
+    GotifyClient Function(String serverUrl)? clientFactory,
+  })  : _secureStorage = secureStorage ?? const FlutterSecureStorage(),
+        _clientFactory = clientFactory ?? ClientFactory.getClient;
 
   /// Loads authentication state from secure storage
   Future<AuthState> loadAuth() async {
@@ -75,7 +79,7 @@ class AuthService {
     try {
       _logger.info('Attempting login to server: $serverUrl');
 
-      final GotifyClient client = ClientFactory.getClient(serverUrl);
+      final GotifyClient client = _clientFactory(serverUrl);
       String? token = config.clientToken;
 
       // If username/password is provided, get token via client creation
@@ -179,7 +183,7 @@ class AuthService {
   Future<void> _verifyTokenSilently(String serverUrl, String token) async {
     try {
       _logger.fine('Silently verifying stored token');
-      final GotifyClient client = ClientFactory.getClient(serverUrl);
+      final GotifyClient client = _clientFactory(serverUrl);
 
       final bool isValid = await client.verifyToken(token);
 
