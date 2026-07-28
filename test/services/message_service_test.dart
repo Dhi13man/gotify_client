@@ -50,7 +50,7 @@ void main() {
       );
 
       // Act
-      final void Function() constructService = () => MessageService(authState);
+      void constructService() => MessageService(authState);
 
       // Assert
       expect(
@@ -75,8 +75,8 @@ void main() {
         );
 
         // Act
-        final void Function() constructService =
-            () => MessageService(authState, client: mockClient);
+        void constructService() =>
+            MessageService(authState, client: mockClient);
 
         // Assert
         expect(
