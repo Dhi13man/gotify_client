@@ -183,7 +183,7 @@ class GotifyHttpClient implements GotifyClient {
 
       final headers = {
         ..._buildAuthHeaders(),
-        if (additionalHeaders != null) ...additionalHeaders,
+        ...?additionalHeaders,
       };
 
       final response = await _httpClient.get(url, headers: headers);
@@ -213,7 +213,7 @@ class GotifyHttpClient implements GotifyClient {
       final Map<String, String> headers = {
         _contentTypeHeader: contentType,
         ..._buildAuthHeaders(),
-        if (additionalHeaders != null) ...additionalHeaders,
+        ...?additionalHeaders,
       };
 
       Object? requestBody;
@@ -254,7 +254,7 @@ class GotifyHttpClient implements GotifyClient {
       final Map<String, String> headers = {
         _contentTypeHeader: contentType,
         ..._buildAuthHeaders(),
-        if (additionalHeaders != null) ...additionalHeaders,
+        ...?additionalHeaders,
       };
 
       Object? requestBody;
@@ -292,7 +292,7 @@ class GotifyHttpClient implements GotifyClient {
 
       final headers = {
         ..._buildAuthHeaders(),
-        if (additionalHeaders != null) ...additionalHeaders,
+        ...?additionalHeaders,
       };
 
       final response = await _httpClient.delete(url, headers: headers);
@@ -377,9 +377,9 @@ class GotifyHttpClient implements GotifyClient {
 
     final Map<String, dynamic> body = {
       'message': message,
-      if (title != null) 'title': title,
-      if (priority != null) 'priority': priority,
-      if (extras != null) 'extras': extras,
+      'title': ?title,
+      'priority': ?priority,
+      'extras': ?extras,
     };
 
     final data = await _post(_messageEndpoint, body: body);
@@ -461,8 +461,8 @@ class GotifyHttpClient implements GotifyClient {
   }) async {
     final Map<String, dynamic> body = {
       'name': name,
-      if (description != null) 'description': description,
-      if (defaultPriority != null) 'defaultPriority': defaultPriority,
+      'description': ?description,
+      'defaultPriority': ?defaultPriority,
     };
 
     final data = await _post(_applicationEndpoint, body: body);
@@ -478,8 +478,8 @@ class GotifyHttpClient implements GotifyClient {
   }) async {
     final Map<String, dynamic> body = {
       'name': name,
-      if (description != null) 'description': description,
-      if (defaultPriority != null) 'defaultPriority': defaultPriority,
+      'description': ?description,
+      'defaultPriority': ?defaultPriority,
     };
 
     final data = await _put('$_applicationEndpoint/$appId', body: body);
