@@ -432,7 +432,7 @@ class AppTheme {
 
   /// Helper method to get text theme with Google Fonts
   static TextTheme _getTextTheme(ThemeData themeData, Color color) {
-    return GoogleFonts.interTextTheme(
+    return _interTextTheme(
       themeData.textTheme.copyWith(
         displayLarge: themeData.textTheme.displayLarge?.copyWith(
           color: color,
@@ -504,6 +504,34 @@ class AppTheme {
           letterSpacing: 0.5,
         ),
       ),
+    );
+  }
+
+  /// Applies the Inter font from Google Fonts to every style in [textTheme].
+  ///
+  /// google_fonts 9 builds `GoogleFonts.interTextTheme` on the `material_ui`
+  /// package's `TextTheme`, which is a different type from the
+  /// `package:flutter/material.dart` `TextTheme` used by [ThemeData]. Applying
+  /// `GoogleFonts.inter` per style keeps the Flutter `TextTheme` type.
+  static TextTheme _interTextTheme(TextTheme textTheme) {
+    TextStyle? inter(TextStyle? style) =>
+        style == null ? null : GoogleFonts.inter(textStyle: style);
+    return textTheme.copyWith(
+      displayLarge: inter(textTheme.displayLarge),
+      displayMedium: inter(textTheme.displayMedium),
+      displaySmall: inter(textTheme.displaySmall),
+      headlineLarge: inter(textTheme.headlineLarge),
+      headlineMedium: inter(textTheme.headlineMedium),
+      headlineSmall: inter(textTheme.headlineSmall),
+      titleLarge: inter(textTheme.titleLarge),
+      titleMedium: inter(textTheme.titleMedium),
+      titleSmall: inter(textTheme.titleSmall),
+      bodyLarge: inter(textTheme.bodyLarge),
+      bodyMedium: inter(textTheme.bodyMedium),
+      bodySmall: inter(textTheme.bodySmall),
+      labelLarge: inter(textTheme.labelLarge),
+      labelMedium: inter(textTheme.labelMedium),
+      labelSmall: inter(textTheme.labelSmall),
     );
   }
 }
